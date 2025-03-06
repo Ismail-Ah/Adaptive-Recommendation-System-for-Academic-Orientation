@@ -1,3 +1,0 @@
-[submodule "backend/UserService"] 
-    path = backend/UserService 
-    url = ./backend/UserService 
