@@ -1,0 +1,152 @@
+import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
+import type { AuthState, AuthContextType, RegisterData, User } from '../types';
+
+const initialState: AuthState = {
+  isAuthenticated: false,
+  user: null,
+  isLoading: false,
+  isCheckingAuth: true, // New flag to track initial auth check
+  error: null,
+  token: null,
+};
+
+const BACKEND_URL = "http://localhost:8080";
+
+type AuthAction =
+  | { type: 'AUTH_START' }
+  | { type: 'AUTH_SUCCESS'; payload: { user: User; token: string } }
+  | { type: 'AUTH_FAILURE'; payload: string }
+  | { type: 'AUTH_CHECKED' } // New action for when check is complete
+  | { type: 'LOGOUT' };
+
+function authReducer(state: AuthState, action: AuthAction): AuthState {
+  switch (action.type) {
+    case 'AUTH_START':
+      return { ...state, isLoading: true, error: null };
+    case 'AUTH_SUCCESS':
+      return {
+        ...state,
+        isAuthenticated: true,
+        user: action.payload.user,
+        token: action.payload.token,
+        isLoading: false,
+        isCheckingAuth: false,
+        error: null,
+      };
+    case 'AUTH_FAILURE':
+      return {
+        ...state,
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        isLoading: false,
+        isCheckingAuth: false,
+        error: action.payload,
+      };
+    case 'AUTH_CHECKED':
+      return { ...state, isCheckingAuth: false };
+    case 'LOGOUT':
+      return { ...initialState, token: null, isCheckingAuth: false };
+    default:
+      return state;
+  }
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch(`${BACKEND_URL}/api/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error('Token invalid');
+          return response.json();
+        })
+        .then((data: User) => {
+          dispatch({ type: 'AUTH_SUCCESS', payload: { user: data, token } });
+        })
+        .catch((error) => {
+          console.error('Token validation failed:', error);
+          localStorage.removeItem('token');
+          dispatch({ type: 'AUTH_FAILURE', payload: 'Invalid token' });
+        });
+    } else {
+      dispatch({ type: 'AUTH_CHECKED' }); // No token, mark check as complete
+    }
+  }, []); // Empty dependency array to run only on mount
+
+  const login = useCallback(async (studentId: string, password: string) => {
+    try {
+      dispatch({ type: 'AUTH_START' });
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: studentId, password }),
+      });
+      if (!response.ok) throw new Error('Invalid credentials');
+      const data: { token: string; id: string; email: string; name: string; year: string; interests: string[]; subjects: string[] } = await response.json();
+      const user = { id: data.id, email: data.email, name: data.name, year: data.year, interests: data.interests, subjects: data.subjects };
+      localStorage.setItem('token', data.token);
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: data.token } });
+    } catch (error) {
+      localStorage.removeItem('token');
+      dispatch({ type: 'AUTH_FAILURE', payload: 'Invalid credentials' });
+      throw error;
+    }
+  }, []);
+
+  const register = useCallback(async (data: RegisterData) => {
+    try {
+      dispatch({ type: 'AUTH_START' });
+      const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Registration failed');
+      const responseData: { token: string; id: string; email: string; name: string; year: string; interests: string[]; subjects: string[] } = await response.json();
+      const user = { id: responseData.id, email: responseData.email, name: responseData.name, year: responseData.year, interests: responseData.interests, subjects: responseData.subjects };
+      localStorage.setItem('token', responseData.token);
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: responseData.token } });
+    } catch (error) {
+      localStorage.removeItem('token');
+      dispatch({ type: 'AUTH_FAILURE', payload: 'Registration failed' });
+      throw error;
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await fetch(`${BACKEND_URL}/api/auth/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+      }
+      localStorage.removeItem('token');
+      dispatch({ type: 'LOGOUT' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      localStorage.removeItem('token');
+      dispatch({ type: 'LOGOUT' });
+    }
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  return context;
+}

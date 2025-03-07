@@ -1,6 +1,8 @@
 package org.example.userservicef.config;
 
 import org.example.userservicef.service.CustomUserDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +20,8 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
+
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
@@ -27,35 +31,34 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        System.out.println("JwtFilter: Processing request for " + request.getRequestURI());
+        logger.info("Processing request for {}", request.getRequestURI());
         String authorizationHeader = request.getHeader("Authorization");
 
         String token = null;
         String username = null;
 
-        // Only process token for protected endpoints, skip for /api/auth/login
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ") &&
                 !request.getRequestURI().equals("/api/auth/login")) {
             token = authorizationHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(token);
-                System.out.println("JwtFilter: Extracted username: " + username);
+                logger.info("Extracted username: {}", username);
             } catch (Exception e) {
-                System.err.println("JwtFilter: Invalid JWT token: " + e.getMessage());
+                logger.error("Invalid JWT token: {}", e.getMessage());
             }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            System.out.println("JwtFilter: Loading user details for " + username);
+            logger.info("Loading user details for {}", username);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (userDetails != null && jwtUtil.validateToken(token, userDetails)) {
-                System.out.println("JwtFilter: Token validated, setting authentication");
+                logger.info("Token validated, setting authentication");
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } else {
-                System.out.println("JwtFilter: Token validation failed or userDetails null");
+                logger.warn("Token validation failed or userDetails null for {}", username);
             }
         }
         chain.doFilter(request, response);

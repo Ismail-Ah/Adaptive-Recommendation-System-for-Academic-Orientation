@@ -1,50 +1,62 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { AuthGuard } from './components/AuthGuard';
-import { Login } from './pages/Login';
-import { UserManagement } from './pages/UserManagement';
-import { UserProfile } from './pages/UserProfile';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Navbar from './components/Navbar';
+import DashboardLayout from './components/DashboardLayout';
+import Home from './pages/Home';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
+import Recommendations from './pages/Recommendations';
+import About from './pages/About';
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isCheckingAuth } = useAuth();
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+}
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/admin"
-            element={
-              <AuthGuard requiredRole="admin">
-                <UserManagement />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <AuthGuard requiredRole="user">
-                <UserProfile />
-              </AuthGuard>
-            }
-          />
-          <Route
-            path="/"
-            element={<Navigate to="/login" replace />}
-          />
-          <Route
-            path="*"
-            element={
-              <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-gray-900">404</h1>
-                  <p className="mt-2 text-lg text-gray-600">Page non trouvée</p>
-                </div>
-              </div>
-            }
-          />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <AuthProvider> {/* Single AuthProvider */}
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/about" element={<About />} />
+            <Route element={<DashboardLayout />}>
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/recommendations"
+                element={
+                  <PrivateRoute>
+                    <Recommendations />
+                  </PrivateRoute>
+                }
+              />
+            </Route>
+          </Routes>
+        </div>
+      </AuthProvider>
+    </Router>
   );
 }
 

@@ -1,107 +1,132 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Link, useNavigate } from 'react-router-dom';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 import { LogIn } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
-export const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+const loginSchema = z.object({
+  studentId: z.string()
+  /*
+    .min(1, 'Student ID is required')
+    .regex(/^[A-Z0-9]+$/, 'Student ID must contain only uppercase letters and numbers'),
+    */,
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    /*
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+    */
+});
+
+type LoginForm = z.infer<typeof loginSchema>;
+
+function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, error: authError } = useAuth();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
+  const onSubmit = async (data: LoginForm) => {
     try {
-      const success = await login(username, password);
-      if (success) {
-        navigate('/');
-      } else {
-        setError('Identifiants invalides');
-      }
-    } catch (err) {
-      setError('Une erreur est survenue');
+      await login(data.studentId, data.password);
+      navigate('/profile');
+    } catch (error) {
+      setError('root', {
+        type: 'manual',
+        message: 'Invalid credentials',
+      });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
-      <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-2xl">
-        <div className="text-center">
-          <div className="flex justify-center">
-            <LogIn className="h-12 w-12 text-indigo-600" />
+    <div className="min-h-[80vh] flex items-center justify-center">
+      <div className="max-w-md w-full bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-8">
+          <div className="flex flex-col items-center mb-8">
+            <LogIn className="h-12 w-12 text-blue-600 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
+            <p className="text-gray-600 mt-2">Sign in to your account</p>
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Bienvenue
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Connectez-vous à votre compte
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Nom d'utilisateur
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
-                placeholder="Entrez votre nom d'utilisateur"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
-                placeholder="Entrez votre mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
+          
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {(errors.root || authError) && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+                {errors.root?.message || authError}
               </div>
-            </div>
-          )}
+            )}
 
-          <div>
-            <button
+            <div>
+              <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 mb-1">
+                Student ID
+              </label>
+              <Input
+                id="studentId"
+                type="text"
+                placeholder="Enter your student ID"
+                error={!!errors.studentId}
+                helperText={errors.studentId?.message}
+                {...register('studentId')}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                error={!!errors.password}
+                helperText={errors.password?.message}
+                {...register('password')}
+              />
+            </div>
+
+            <Button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition duration-150 ease-in-out hover:scale-[1.02]"
+              className="w-full"
+              disabled={isSubmitting}
             >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                <LogIn className="h-5 w-5 text-indigo-300 group-hover:text-indigo-200" />
-              </span>
-              Se connecter
-            </button>
+              {isSubmitting ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                Register here
+              </Link>
+            </p>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
-};
+}
+
+export default Login;

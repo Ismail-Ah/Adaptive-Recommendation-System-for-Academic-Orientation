@@ -6,6 +6,8 @@ import org.example.userservicef.config.JwtUtil;
 import org.example.userservicef.model.User;
 import org.example.userservicef.repository.UserRepository;
 import org.example.userservicef.service.CustomUserDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,10 +16,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -36,31 +43,46 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody User user) {
+        logger.info("Registering user: {}", user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully");
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        String token = jwtUtil.generateToken(userDetails);
+        return ResponseEntity.ok(new AuthResponse(token, user.getId(), user.getEmail(), user.getName(), user.getYear(), user.getInterests(), user.getSubjects()));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) throws Exception {
-        System.out.println("AuthController: Attempting login for " + loginRequest.getEmail());
+        logger.info("Attempting login for {}", loginRequest.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
-        System.out.println("AuthController: Authentication successful");
+        logger.info("Authentication successful");
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
-        System.out.println("AuthController: User details loaded for " + userDetails.getUsername());
+        logger.info("User details loaded for {}", userDetails.getUsername());
         String token = jwtUtil.generateToken(userDetails);
-        System.out.println("AuthController: Token generated: " + token);
-        return ResponseEntity.ok(new JwtResponse(token));
+        User user = userRepository.findByEmail(loginRequest.getEmail());
+        logger.info("Token generated: {}", token);
+        return ResponseEntity.ok(new AuthResponse(token, user.getId(), user.getEmail(), user.getName(), user.getYear(), user.getInterests(), user.getSubjects()));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        // Since JWT is stateless, we just inform the client to remove the token.
-        response.setHeader("Authorization", ""); // Clear the token
+        logger.info("User logged out");
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Principal principal) {
+        if (principal == null) {
+            logger.warn("No authenticated user found");
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Not authenticated");
+        }
+        logger.info("Fetching details for user: {}", principal.getName());
+        User user = userRepository.findByEmail(principal.getName());
+        return ResponseEntity.ok(new UserResponse(user.getId(), user.getEmail(), user.getName(), user.getYear(), user.getInterests(), user.getSubjects()));
     }
 }
 
-record JwtResponse(String token) {}
+record AuthResponse(String token, String id, String email, String name, String year, List<String> interests, List<String> subjects) {}
+record UserResponse(String id, String email, String name, String year, List<String> interests, List<String> subjects) {}

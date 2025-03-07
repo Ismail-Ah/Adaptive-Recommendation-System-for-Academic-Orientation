@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -17,32 +19,32 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
     private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
 
-    @Value("${jwt.secret}") // Load the secret key from application.properties or environment variables
+    @Value("${jwt.secret}")
     private String secret;
 
-    // Generate a secure 512-bit key from the secret
     private SecretKey getSecretKey() {
-        byte[] decodedKey = Base64.getDecoder().decode(secret); // Decode the base64-encoded secret
-        return Keys.hmacShaKeyFor(decodedKey); // Create a secure key
+        byte[] decodedKey = Base64.getDecoder().decode(secret);
+        return Keys.hmacShaKeyFor(decodedKey);
     }
 
     public String generateToken(UserDetails userDetails) {
-        System.out.println("JwtUtil: Generating token for " + userDetails.getUsername());
+        logger.info("Generating token for {}", userDetails.getUsername());
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(getSecretKey(), SignatureAlgorithm.HS512) // Use the secure key
+                .signWith(getSecretKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSecretKey()) // Use the secure key
+                .setSigningKey(getSecretKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -50,17 +52,20 @@ public class JwtUtil {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        System.out.println("JwtUtil: Validating token for " + (userDetails != null ? userDetails.getUsername() : "null"));
+        logger.info("Validating token for {}", userDetails != null ? userDetails.getUsername() : "null");
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(getSecretKey()) // Use the secure key
+                    .setSigningKey(getSecretKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
             String username = claims.getSubject();
             return username.equals(userDetails.getUsername()) && !isTokenExpired(claims);
-        } catch (Exception e) {
-            System.err.println("JwtUtil: Token validation failed: " + e.getMessage());
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            logger.error("Token expired: {}", e.getMessage());
+            return false;
+        } catch (io.jsonwebtoken.MalformedJwtException | io.jsonwebtoken.SignatureException e) {
+            logger.error("Invalid token: {}", e.getMessage());
             return false;
         }
     }
