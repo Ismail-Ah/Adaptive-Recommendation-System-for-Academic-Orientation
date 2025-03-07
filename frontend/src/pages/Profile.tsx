@@ -40,7 +40,7 @@ type SubjectOption = typeof availableSubjects[number];
 type CareerAspirationOption = typeof availableCareerAspirations[number];
 
 const Profile: React.FC = () => {
-  const { user, updateProfile } = useAuth(); // Assume useAuth returns { user: User, updateProfile: (data: FormData) => Promise<void> }
+  const { user, updateProfile } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     name: '',
@@ -100,24 +100,26 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 bg-gray-50 min-h-screen">
-      <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-8 text-white">
+    <div className="max-w-4xl mx-auto px-4 py-12 bg-gray-50 min-h-screen">
+      <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-white">
           <div className="flex items-center space-x-4">
-            <div className="bg-white/20 p-3 rounded-full">
-              <UserCircle className="h-10 w-10" />
+            <div className="bg-white/20 p-3 rounded-full shadow-md">
+              <UserCircle className="h-12 w-12 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Profil Étudiant</h1>
-              <p className="text-blue-100">Gérez vos informations académiques</p>
+              <h1 className="text-3xl font-extrabold tracking-tight">Profil Étudiant</h1>
+              <p className="mt-1 text-blue-100 text-lg">Personnalisez vos informations académiques</p>
             </div>
           </div>
         </div>
 
+        {/* Form */}
         <div className="px-6 py-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-10">
             {/* Basic Info */}
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email
@@ -126,8 +128,9 @@ const Profile: React.FC = () => {
                   type="email"
                   id="email"
                   value={formData.email}
-                  disabled // Email is the identifier, non-editable
-                  className="block w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 px-4 py-3"
+                  disabled
+                  className="block w-full rounded-xl border-gray-200 bg-gray-100 px-4 py-3 text-gray-500 shadow-sm focus:ring-0"
+                  aria-disabled="true"
                 />
               </div>
 
@@ -142,12 +145,12 @@ const Profile: React.FC = () => {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3"
+                  className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duration-200"
                   placeholder="Entrez votre nom complet"
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 sm:col-span-2">
                 <label htmlFor="year" className="block text-sm font-medium text-gray-700">
                   Année Académique
                 </label>
@@ -157,7 +160,7 @@ const Profile: React.FC = () => {
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     setFormData({ ...formData, year: e.target.value })
                   }
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3"
+                  className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duration-200"
                 >
                   <option value="1ère Bac">1ère Bac</option>
                   <option value="2ème Bac">2ème Bac</option>
@@ -166,22 +169,20 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Interests Section */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-medium text-gray-900">Intérêts</h3>
-                </div>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <BookOpen className="h-6 w-6 text-indigo-600" />
+                <h3 className="text-xl font-semibold text-gray-900">Intérêts</h3>
               </div>
               <div className="space-y-4">
                 {formData.interests.map((interest, index) => (
-                  <div key={index} className="flex items-center gap-4">
+                  <div key={index} className="flex items-center gap-4 animate-fade-in">
                     <select
                       value={interest}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleItemChange('interests', index, e.target.value)
                       }
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                      className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duration-200"
                     >
                       <option value="">Sélectionnez un intérêt</option>
                       {availableInterests.map((opt) => (
@@ -193,7 +194,8 @@ const Profile: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveItem('interests', index)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
+                      aria-label="Supprimer cet intérêt"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -202,7 +204,7 @@ const Profile: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddItem('interests')}
-                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-gray-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-indigo-300 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200"
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
                   Ajouter un Intérêt
@@ -211,22 +213,20 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Subjects Section */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-medium text-gray-900">Matières</h3>
-                </div>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <BookOpen className="h-6 w-6 text-indigo-600" />
+                <h3 className="text-xl font-semibold text-gray-900">Matières</h3>
               </div>
               <div className="space-y-4">
                 {formData.subjects.map((subject, index) => (
-                  <div key={index} className="flex items-center gap-4">
+                  <div key={index} className="flex items-center gap-4 animate-fade-in">
                     <select
                       value={subject}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleItemChange('subjects', index, e.target.value)
                       }
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                      className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duration-200"
                     >
                       <option value="">Sélectionnez une matière</option>
                       {availableSubjects.map((opt) => (
@@ -238,7 +238,8 @@ const Profile: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveItem('subjects', index)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
+                      aria-label="Supprimer cette matière"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -247,7 +248,7 @@ const Profile: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddItem('subjects')}
-                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-gray-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-indigo-300 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200"
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
                   Ajouter une Matière
@@ -256,22 +257,20 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Career Aspirations Section */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-medium text-gray-900">Aspirations Professionnelles</h3>
-                </div>
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <BookOpen className="h-6 w-6 text-indigo-600" />
+                <h3 className="text-xl font-semibold text-gray-900">Aspirations Professionnelles</h3>
               </div>
               <div className="space-y-4">
                 {formData.careerAspirations.map((aspiration, index) => (
-                  <div key={index} className="flex items-center gap-4">
+                  <div key={index} className="flex items-center gap-4 animate-fade-in">
                     <select
                       value={aspiration}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleItemChange('careerAspirations', index, e.target.value)
                       }
-                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                      className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duration-200"
                     >
                       <option value="">Sélectionnez une aspiration</option>
                       {availableCareerAspirations.map((opt) => (
@@ -283,7 +282,8 @@ const Profile: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveItem('careerAspirations', index)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
+                      aria-label="Supprimer cette aspiration"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -292,7 +292,7 @@ const Profile: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddItem('careerAspirations')}
-                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-gray-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-indigo-300 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200"
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
                   Ajouter une Aspiration
@@ -305,10 +305,10 @@ const Profile: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full inline-flex justify-center items-center gap-2 py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-70"
+                className="w-full inline-flex justify-center items-center gap-2 py-4 px-6 border border-transparent shadow-md text-base font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
-                  <span className="inline-block h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+                  <span className="inline-block h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
                 ) : (
                   <Save className="h-5 w-5" />
                 )}
