@@ -1,20 +1,25 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { GraduationCap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-function Navbar() {
+interface NavbarProps {
+  className?: string; // Optional className prop
+}
+
+const Navbar: React.FC<NavbarProps> = ({ className }) => {
   const { user } = useAuth();
+  const location = useLocation();
 
   // Function to get user initials
-  const getInitials = (name:any) => {
+  const getInitials = (name: string | undefined): string => {
     if (!name) return '';
     const names = name.split(' ');
-    return names.map((n:any) => n[0]).join('').toUpperCase();
+    return names.map((n) => n[0]).join('').toUpperCase();
   };
 
   return (
-    <nav className="bg-white shadow-sm">
+    <nav className={`bg-white shadow-sm ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -28,18 +33,24 @@ function Navbar() {
             {user ? (
               <>
                 <div className="flex items-center space-x-2">
-                  {/* User avatar with fallback */}
-            
-                  
                   <span className="text-gray-900 font-medium">{user.name}</span>
                   <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-                      {getInitials(user.name)}
-                    </div>
+                    {getInitials(user.name)}
+                  </div>
                 </div>
               </>
             ) : (
               <>
-                <Link to="/login" className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600">
+                {location.pathname === '/about' ? (
+                  <Link to="/" className="px-3 py-2 rounded-md text-sm font-medium text-black-600 hover:text-blue-600">
+                    Home
+                  </Link>
+                ) : (
+                  <Link to="/about" className="px-3 py-2 rounded-md text-sm font-medium text-black-600 hover:text-blue-600">
+                    About Us
+                  </Link>
+                )}
+                <Link to="/login" className="px-3 py-2 rounded-md text-sm font-medium text-black-600 hover:text-blue-600">
                   Login
                 </Link>
                 <Link
@@ -55,6 +66,6 @@ function Navbar() {
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

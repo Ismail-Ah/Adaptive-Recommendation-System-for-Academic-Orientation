@@ -1,76 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, Save, UserCircle, BookOpen } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext'; // Adjust path to your AuthContext
 
-// Mock useUser hook with default data
-const mockUseUser = () => {
-  const defaultProfile = {
-    name: 'John Doe',
-    year: '1ère Bac',
-    interests: ['Mathématiques', 'Physique'],
-    subjects: [
-      { name: 'Mathématiques', grade: 85 },
-      { name: 'Physique', grade: 90 },
-      { name: 'Sciences de la Vie et de la Terre', grade: 88 }
-    ]
-  };
+// Define types for User and form data
+interface User {
+  email: string;
+  name: string;
+  year: string;
+  interests: string[];
+  subjects: string[];
+  careerAspirations: string[];
+}
 
-  return {
-    profile: defaultProfile,
-    updateProfile: async (data: any) => console.log('Profile updated with:', data)
-  };
-};
+interface FormData {
+  email: string;
+  name: string;
+  year: string;
+  interests: string[];
+  subjects: string[];
+  careerAspirations: string[];
+}
 
-function Profile() {
-  const { profile, updateProfile } = mockUseUser();
-  const [formData, setFormData] = useState({
+// Predefined options (typed as const arrays)
+const availableInterests = [
+  'Mathématiques', 'Physique', 'Chimie', 'Sciences de la Vie et de la Terre',
+  'Informatique', 'Économie et Gestion', 'Littérature', 'Philosophie',
+] as const;
+const availableSubjects = [
+  'Mathématiques', 'Physique-Chimie', 'Sciences de la Vie et de la Terre',
+  'Français', 'Arabe', 'Histoire-Géographie', 'Philosophie',
+] as const;
+const availableCareerAspirations = [
+  'Ingénierie', 'Médecine', 'Droit', 'Économie', 'Enseignement',
+  'Technologie de l’Information', 'Arts et Lettres',
+] as const;
+
+type InterestOption = typeof availableInterests[number];
+type SubjectOption = typeof availableSubjects[number];
+type CareerAspirationOption = typeof availableCareerAspirations[number];
+
+const Profile: React.FC = () => {
+  const { user, updateProfile } = useAuth(); // Assume useAuth returns { user: User, updateProfile: (data: FormData) => Promise<void> }
+  const [formData, setFormData] = useState<FormData>({
+    email: '',
     name: '',
     year: '1ère Bac',
-    interests: ['Mathématiques', 'Physique'],
-    subjects: [
-      { name: 'Mathématiques', grade: 85 },
-      { name: 'Physique', grade: 90 },
-      { name: 'Sciences de la Vie et de la Terre', grade: 88 }
-    ]
+    interests: [],
+    subjects: [],
+    careerAspirations: [],
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
-    if (profile) {
-      setFormData(profile);
+    if (user) {
+      setFormData({
+        email: user.email || '',
+        name: user.name || '',
+        year: user.year || '1ère Bac',
+        interests: user.interests || [],
+        subjects: user.subjects || [],
+        careerAspirations: user.careerAspirations || [],
+      });
     }
-  }, [profile]);
+  }, [user]);
 
-  const handleAddSubject = () => {
+  const handleAddItem = (field: keyof Pick<FormData, 'interests' | 'subjects' | 'careerAspirations'>): void => {
     setFormData({
       ...formData,
-      subjects: [...formData.subjects, { name: '', grade: 0 }]
+      [field]: [...formData[field], ''], // Add empty string for new item
     });
   };
 
-  const handleRemoveSubject = (index: number) => {
-    const newSubjects = formData.subjects.filter((_, i) => i !== index);
-    setFormData({ ...formData, subjects: newSubjects });
+  const handleRemoveItem = (field: keyof Pick<FormData, 'interests' | 'subjects' | 'careerAspirations'>, index: number): void => {
+    const newItems = formData[field].filter((_, i) => i !== index);
+    setFormData({ ...formData, [field]: newItems });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleItemChange = (
+    field: keyof Pick<FormData, 'interests' | 'subjects' | 'careerAspirations'>,
+    index: number,
+    value: string
+  ): void => {
+    const newItems = [...formData[field]];
+    newItems[index] = value;
+    setFormData({ ...formData, [field]: newItems });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       await updateProfile(formData);
-      // Add success notification here
-      setTimeout(() => {
-        setIsSubmitting(false);
-      }, 600);
+      console.log('Profile updated successfully');
+      setTimeout(() => setIsSubmitting(false), 600);
     } catch (error) {
       console.error('Failed to update profile:', error);
       setIsSubmitting(false);
     }
   };
-
-  // Calculate average grade
-  const averageGrade = formData.subjects.length > 0 
-    ? (formData.subjects.reduce((sum, subject) => sum + subject.grade, 0) / formData.subjects.length).toFixed(1)
-    : 0;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 bg-gray-50 min-h-screen">
@@ -81,37 +108,55 @@ function Profile() {
               <UserCircle className="h-10 w-10" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Student Profile</h1>
-              <p className="text-blue-100">Manage your academic information</p>
+              <h1 className="text-2xl font-bold">Profil Étudiant</h1>
+              <p className="text-blue-100">Gérez vos informations académiques</p>
             </div>
           </div>
         </div>
-        
+
         <div className="px-6 py-8">
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Info */}
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
               <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={formData.email}
+                  disabled // Email is the identifier, non-editable
+                  className="block w-full rounded-lg border-gray-300 shadow-sm bg-gray-100 px-4 py-3"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Full Name
+                  Nom Complet
                 </label>
                 <input
                   type="text"
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3"
-                  placeholder="Enter your full name"
+                  placeholder="Entrez votre nom complet"
                 />
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="year" className="block text-sm font-medium text-gray-700">
-                  Academic Year
+                  Année Académique
                 </label>
                 <select
                   id="year"
                   value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setFormData({ ...formData, year: e.target.value })
+                  }
                   className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3"
                 >
                   <option value="1ère Bac">1ère Bac</option>
@@ -120,75 +165,142 @@ function Profile() {
               </div>
             </div>
 
+            {/* Interests Section */}
             <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-medium text-gray-900">Academic Subjects</h3>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-600">Average Grade:</span>
-                  <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold text-sm">
-                    {averageGrade}
-                  </span>
+                  <h3 className="text-lg font-medium text-gray-900">Intérêts</h3>
                 </div>
               </div>
-              
               <div className="space-y-4">
-                {formData.subjects.map((subject, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center gap-4 bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
-                  >
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        value={subject.name}
-                        onChange={(e) => {
-                          const newSubjects = [...formData.subjects];
-                          newSubjects[index].name = e.target.value;
-                          setFormData({ ...formData, subjects: newSubjects });
-                        }}
-                        placeholder="Subject name"
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                      />
-                    </div>
-                    <div className="w-32">
-                      <input
-                        type="number"
-                        value={subject.grade}
-                        min="0"
-                        max="100"
-                        onChange={(e) => {
-                          const newSubjects = [...formData.subjects];
-                          newSubjects[index].grade = parseInt(e.target.value);
-                          setFormData({ ...formData, subjects: newSubjects });
-                        }}
-                        placeholder="Grade"
-                        className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                      />
-                    </div>
+                {formData.interests.map((interest, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <select
+                      value={interest}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        handleItemChange('interests', index, e.target.value)
+                      }
+                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                    >
+                      <option value="">Sélectionnez un intérêt</option>
+                      {availableInterests.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
                     <button
                       type="button"
-                      onClick={() => handleRemoveSubject(index)}
+                      onClick={() => handleRemoveItem('interests', index)}
                       className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
                 ))}
-                
                 <button
                   type="button"
-                  onClick={handleAddSubject}
-                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-gray-300 rounded-lg text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                  onClick={() => handleAddItem('interests')}
+                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-gray-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors duration-200"
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
-                  Add New Subject
+                  Ajouter un Intérêt
                 </button>
               </div>
             </div>
 
+            {/* Subjects Section */}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
+                  <h3 className="text-lg font-medium text-gray-900">Matières</h3>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {formData.subjects.map((subject, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <select
+                      value={subject}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        handleItemChange('subjects', index, e.target.value)
+                      }
+                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                    >
+                      <option value="">Sélectionnez une matière</option>
+                      {availableSubjects.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem('subjects', index)}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => handleAddItem('subjects')}
+                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-gray-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                >
+                  <PlusCircle className="h-5 w-5 mr-2" />
+                  Ajouter une Matière
+                </button>
+              </div>
+            </div>
+
+            {/* Career Aspirations Section */}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
+                  <h3 className="text-lg font-medium text-gray-900">Aspirations Professionnelles</h3>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {formData.careerAspirations.map((aspiration, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <select
+                      value={aspiration}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        handleItemChange('careerAspirations', index, e.target.value)
+                      }
+                      className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                    >
+                      <option value="">Sélectionnez une aspiration</option>
+                      {availableCareerAspirations.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem('careerAspirations', index)}
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => handleAddItem('careerAspirations')}
+                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-gray-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                >
+                  <PlusCircle className="h-5 w-5 mr-2" />
+                  Ajouter une Aspiration
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
             <div className="pt-4">
               <button
                 type="submit"
@@ -200,7 +312,7 @@ function Profile() {
                 ) : (
                   <Save className="h-5 w-5" />
                 )}
-                {isSubmitting ? 'Saving...' : 'Save Profile Changes'}
+                {isSubmitting ? 'Enregistrement...' : 'Enregistrer les Modifications'}
               </button>
             </div>
           </form>
@@ -208,6 +320,6 @@ function Profile() {
       </div>
     </div>
   );
-}
+};
 
 export default Profile;

@@ -27,33 +27,38 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <Router>
-      <AuthProvider> {/* Single AuthProvider */}
+      <AuthProvider>
         <div className="min-h-screen bg-gray-50">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/about" element={<About />} />
-            <Route element={<DashboardLayout />}>
-              <Route
-                path="/profile"
-                element={
-                  <PrivateRoute>
-                    <Profile />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/recommendations"
-                element={
-                  <PrivateRoute>
-                    <Recommendations />
-                  </PrivateRoute>
-                }
-              />
-            </Route>
-          </Routes>
+          {/* Fixed Navbar */}
+          <Navbar className="fixed top-0 left-0 right-0 z-50" />
+
+          {/* Main content with padding to account for the fixed Navbar */}
+          <div className="pt-16">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/about" element={<About />} />
+              <Route element={<DashboardLayout />}>
+                <Route
+                  path="/profile"
+                  element={
+                    <PrivateRoute>
+                      <Profile />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/recommendations"
+                  element={
+                    <PrivateRoute>
+                      <Recommendations />
+                    </PrivateRoute>
+                  }
+                />
+              </Route>
+            </Routes>
+          </div>
         </div>
       </AuthProvider>
     </Router>

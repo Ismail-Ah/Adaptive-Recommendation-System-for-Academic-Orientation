@@ -89,8 +89,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email: studentId, password }),
       });
       if (!response.ok) throw new Error('Invalid credentials');
-      const data: { token: string; id: string; email: string; name: string; year: string; interests: string[]; subjects: string[] } = await response.json();
-      const user = { id: data.id, email: data.email, name: data.name, year: data.year, interests: data.interests, subjects: data.subjects };
+      const data: { token: string; id: string; email: string; name: string; year: string; interests: string[]; subjects: string[];careerAspirations:string[] } = await response.json();
+      const user = { id: data.id, email: data.email, name: data.name, year: data.year, interests: data.interests, subjects: data.subjects,careerAspirations:data.careerAspirations };
       localStorage.setItem('token', data.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: data.token } });
     } catch (error) {
@@ -109,8 +109,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Registration failed');
-      const responseData: { token: string; id: string; email: string; name: string; year: string; interests: string[]; subjects: string[] } = await response.json();
-      const user = { id: responseData.id, email: responseData.email, name: responseData.name, year: responseData.year, interests: responseData.interests, subjects: responseData.subjects };
+      const responseData: { token: string; id: string; email: string; name: string; year: string; interests: string[]; subjects: string[],careerAspirations:string[] } = await response.json();
+      const user = { id: responseData.id, email: responseData.email, name: responseData.name, year: responseData.year, interests: responseData.interests, subjects: responseData.subjects,careerAspirations:responseData.careerAspirations };
       localStorage.setItem('token', responseData.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: responseData.token } });
     } catch (error) {
@@ -138,8 +138,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // AuthContext.tsx
+  const updateProfile = useCallback(async (data: FormData) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await fetch(`${BACKEND_URL}/api/auth/profile`, { // Updated path
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error('Failed to update profile');
+      const updatedUser: User = await response.json();
+      dispatch({ type: 'AUTH_SUCCESS', payload: { user: updatedUser, token } });
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      throw error;
+    }
+  }, []);
+    
+  
+
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+    <AuthContext.Provider value={{ ...state, login, register, logout,updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

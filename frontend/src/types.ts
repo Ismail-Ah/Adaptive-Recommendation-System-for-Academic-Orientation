@@ -1,11 +1,11 @@
 
 export interface User {
-  id: string;
   email: string;
   name: string;
   year: string;
   interests: string[];
   subjects: string[];
+  careerAspirations:string[];
 }
 
 export interface AuthState {
@@ -20,6 +20,7 @@ export interface AuthContextType extends AuthState {
   login: (studentId: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile : (data: any) => Promise<void>;
 }
 
 export interface RegisterData {
@@ -29,6 +30,7 @@ export interface RegisterData {
   year?: string;
   interests?: string[];
   subjects?: string[];
+  careerAspirations:string[];
 }
 
 export interface Subject {
