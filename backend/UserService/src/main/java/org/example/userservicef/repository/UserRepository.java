@@ -5,6 +5,12 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 
 public interface UserRepository extends Neo4jRepository<User, String> {
-    @Query("MATCH (u:User) WHERE u.email = $email RETURN u{.id, .email, .name, .password, .year, .interests, .subjects, __elementId__: elementId(u)}")
-    User findByEmail(String email);
+    User findByEmail(String email); // Basic find by email
+
+    @Query("MATCH (u:User {email: $email}) " +
+            "OPTIONAL MATCH (u)-[:INTERESTED_IN]->(i:Interest) " +
+            "OPTIONAL MATCH (u)-[:STUDIES]->(s:Subject) " +
+            "OPTIONAL MATCH (u)-[:ASPIRES_TO]->(ca:CareerAspiration) " +
+            "RETURN u, collect(i) AS interests, collect(s) AS subjects, collect(ca) AS careerAspirations")
+    User findUserWithRelationships(String email);
 }
