@@ -1,18 +1,18 @@
-package org.example.userservicef.controller;
+package org.example.userservicef.Controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.userservicef.DTO.UserDTO;
-import org.example.userservicef.config.JwtUtil;
-import org.example.userservicef.model.User;
-import org.example.userservicef.model.Interest;
-import org.example.userservicef.model.Subject;
-import org.example.userservicef.model.CareerAspiration;
-import org.example.userservicef.repository.UserRepository;
-import org.example.userservicef.repository.InterestRepository;
-import org.example.userservicef.repository.SubjectRepository;
-import org.example.userservicef.repository.CareerAspirationRepository;
-import org.example.userservicef.service.CustomUserDetailsService;
+import org.example.userservicef.Security.JwtUtil;
+import org.example.userservicef.Model.User;
+import org.example.userservicef.Model.Interest;
+import org.example.userservicef.Model.Subject;
+import org.example.userservicef.Model.CareerAspiration;
+import org.example.userservicef.Repository.UserRepository;
+import org.example.userservicef.Repository.InterestRepository;
+import org.example.userservicef.Repository.SubjectRepository;
+import org.example.userservicef.Repository.CareerAspirationRepository;
+import org.example.userservicef.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private UserService userDetailsService;
 
     @Autowired
     private JwtUtil jwtUtil;

@@ -1,6 +1,6 @@
-package org.example.userservicef.repository;
+package org.example.userservicef.Repository;
 
-import org.example.userservicef.model.Interest;
+import org.example.userservicef.Model.Interest;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 public interface InterestRepository extends Neo4jRepository<Interest, String> {

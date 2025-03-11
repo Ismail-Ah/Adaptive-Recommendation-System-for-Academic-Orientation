@@ -1,4 +1,4 @@
-package org.example.userservicef.model;
+package org.example.userservicef.Model;
 
 import lombok.Data;
 import org.springframework.data.neo4j.core.schema.Id;

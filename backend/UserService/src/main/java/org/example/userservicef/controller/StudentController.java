@@ -1,7 +1,7 @@
-package org.example.userservicef.controller;
+package org.example.userservicef.Controller;
 
-import org.example.userservicef.model.Student;
-import org.example.userservicef.service.StudentService;
+import org.example.userservicef.Model.Student;
+import org.example.userservicef.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,7 +1,7 @@
-package org.example.userservicef.service;
+package org.example.userservicef.Service;
 
-import org.example.userservicef.model.Student;
-import org.example.userservicef.repository.StudentRepository;
+import org.example.userservicef.Model.Student;
+import org.example.userservicef.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

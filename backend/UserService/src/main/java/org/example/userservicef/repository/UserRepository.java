@@ -1,6 +1,6 @@
-package org.example.userservicef.repository;
+package org.example.userservicef.Repository;
 
-import org.example.userservicef.model.User;
+import org.example.userservicef.Model.User;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 

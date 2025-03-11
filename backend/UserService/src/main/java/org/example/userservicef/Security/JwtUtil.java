@@ -1,4 +1,4 @@
-package org.example.userservicef.config;
+package org.example.userservicef.Security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package org.example.userservicef.model;
+package org.example.userservicef.Model;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;

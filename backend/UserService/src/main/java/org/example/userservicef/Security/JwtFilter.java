@@ -1,6 +1,6 @@
-package org.example.userservicef.config;
+package org.example.userservicef.Security;
 
-import org.example.userservicef.service.CustomUserDetailsService;
+import org.example.userservicef.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private UserService userDetailsService;
 
     @Autowired
     private JwtUtil jwtUtil;
