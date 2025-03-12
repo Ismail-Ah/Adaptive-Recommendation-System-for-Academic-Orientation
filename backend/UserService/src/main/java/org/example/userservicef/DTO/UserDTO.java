@@ -2,15 +2,15 @@ package org.example.userservicef.DTO;
 
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class UserDTO {
     private String email;
     private String name;
-    private String password;
+    private String password; // Only used in signup
     private String year;
-    private List<String> interests;
-    private List<String> subjects;
-    private List<String> careerAspirations;
+    private Set<String> interests;         // Changed to Set<String>
+    private Set<String> subjects;          // Changed to Set<String>
+    private Set<String> careerAspirations; // Changed to Set<String>
 }

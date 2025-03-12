@@ -24,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -104,22 +104,62 @@ public class AuthController {
                 user.getEmail(),
                 user.getName(),
                 user.getYear(),
-                interests.stream().map(Interest::getName).collect(Collectors.toList()),
-                subjects.stream().map(Subject::getName).collect(Collectors.toList()),
-                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toList())
+                interests.stream().map(Interest::getName).collect(Collectors.toSet()),
+                subjects.stream().map(Subject::getName).collect(Collectors.toSet()),
+                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet())
+        ));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody User loginRequest) throws Exception {
+        logger.info("Attempting login for {}", loginRequest.getEmail());
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
+        logger.info("Authentication successful");
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+        String token = jwtUtil.generateToken(userDetails);
+
+        User user = userRepository.findByEmail(loginRequest.getEmail());
+        if (user == null) {
+            logger.error("User not found after authentication: {}", loginRequest.getEmail());
+            throw new Exception("User not found after authentication");
+        }
+
+        logger.info("Raw User from repository: email={}, name={}, year={}, interests={}, subjects={}, careerAspirations={}",
+                user.getEmail(),
+                user.getName(),
+                user.getYear(),
+                user.getInterests(),
+                user.getSubjects(),
+                user.getCareerAspirations());
+
+        logger.info("Token generated: {}", token);
+        return ResponseEntity.ok(new AuthResponse(
+                token,
+                user.getEmail(),
+                user.getEmail(),
+                user.getName(),
+                user.getYear(),
+                user.getInterests() != null ? user.getInterests().stream().map(Interest::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet()
         ));
     }
 
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody UserDTO updatedUserDTO, Principal principal) {
-        logger.info("Updating profile for user: {}", principal.getName());
+        logger.info("Updating profile for user: {}", principal != null ? principal.getName() : "null");
 
         if (principal == null || !principal.getName().equals(updatedUserDTO.getEmail())) {
-            logger.warn("Unauthorized attempt to update profile for: {}", updatedUserDTO.getEmail());
+            logger.warn("Unauthorized attempt to update profile for: {}. Principal: {}",
+                    updatedUserDTO.getEmail(), principal != null ? principal.getName() : "null");
             return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).body("Unauthorized");
         }
 
-        User existingUser = userRepository.findUserWithRelationships(principal.getName());
+        User existingUser = userRepository.findByEmail(principal.getName());
         if (existingUser == null) {
             logger.error("User not found: {}", principal.getName());
             return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body("User not found");
@@ -153,44 +193,9 @@ public class AuthController {
                 existingUser.getEmail(),
                 existingUser.getName(),
                 existingUser.getYear(),
-                interests.stream().map(Interest::getName).collect(Collectors.toList()),
-                subjects.stream().map(Subject::getName).collect(Collectors.toList()),
-                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toList())
-        ));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginRequest) throws Exception {
-        logger.info("Attempting login for {}", loginRequest.getEmail());
-
-        // Authenticate user
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-        );
-        logger.info("Authentication successful");
-
-        // Load user details and generate token
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
-        logger.info("User details loaded for {}", userDetails.getUsername());
-        String token = jwtUtil.generateToken(userDetails);
-
-        // Fetch user with relationships
-        User user = userRepository.findUserWithRelationships(loginRequest.getEmail());
-        if (user == null) {
-            logger.error("User not found after authentication: {}", loginRequest.getEmail());
-            throw new Exception("User not found after authentication");
-        }
-
-        logger.info("Token generated: {}", token);
-        return ResponseEntity.ok(new AuthResponse(
-                token,
-                user.getEmail(), // id = email
-                user.getEmail(),
-                user.getName(),
-                user.getYear(),
-                user.getInterests().stream().map(Interest::getName).collect(Collectors.toList()),
-                user.getSubjects().stream().map(Subject::getName).collect(Collectors.toList()),
-                user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toList())
+                interests.stream().map(Interest::getName).collect(Collectors.toSet()),
+                subjects.stream().map(Subject::getName).collect(Collectors.toSet()),
+                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet())
         ));
     }
 
@@ -208,7 +213,7 @@ public class AuthController {
         }
         logger.info("Fetching details for user: {}", principal.getName());
 
-        User user = userRepository.findUserWithRelationships(principal.getName());
+        User user = userRepository.findByEmail(principal.getName());
         if (user == null) {
             logger.error("Authenticated user not found in database: {}", principal.getName());
             return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body("User not found");
@@ -218,30 +223,29 @@ public class AuthController {
                 user.getEmail(),
                 user.getName(),
                 user.getYear(),
-                user.getInterests().stream().map(Interest::getName).collect(Collectors.toList()),
-                user.getSubjects().stream().map(Subject::getName).collect(Collectors.toList()),
-                user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toList())
+                user.getInterests() != null ? user.getInterests().stream().map(Interest::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet()
         ));
     }
 }
 
-// Records with id for frontend compatibility
 record AuthResponse(
         String token,
-        String id, // Included for frontend compatibility, set to email
+        String id,
         String email,
         String name,
         String year,
-        List<String> interests,
-        List<String> subjects,
-        List<String> careerAspirations
+        Set<String> interests,
+        Set<String> subjects,
+        Set<String> careerAspirations
 ) {}
 
 record UserResponse(
         String email,
         String name,
         String year,
-        List<String> interests,
-        List<String> subjects,
-        List<String> careerAspirations
+        Set<String> interests,
+        Set<String> subjects,
+        Set<String> careerAspirations
 ) {}

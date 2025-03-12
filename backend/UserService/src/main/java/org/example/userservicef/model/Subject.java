@@ -1,11 +1,11 @@
 package org.example.userservicef.Model;
 
+import lombok.Data;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
-import lombok.Data;
 
-@Node("Subject")
 @Data
+@Node("Subject")
 public class Subject {
     @Id
     private String name;

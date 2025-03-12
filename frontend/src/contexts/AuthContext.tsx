@@ -143,7 +143,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
-
+      console.log("update profile with data : ");
+      console.log(data);
       const response = await fetch(`${BACKEND_URL}/api/auth/profile`, { // Updated path
         method: 'PUT',
         headers: {

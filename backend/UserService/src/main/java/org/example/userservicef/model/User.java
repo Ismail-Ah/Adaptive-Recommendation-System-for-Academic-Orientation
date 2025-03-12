@@ -1,31 +1,28 @@
 package org.example.userservicef.Model;
 
+import lombok.Data;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
-import lombok.Data;
 
-import java.util.Set; // Use Set instead of List to avoid duplicates
+import java.util.HashSet;
+import java.util.Set;
 
-@Node("User") // Consider renaming to "Student" to align with your context
 @Data
+@Node("User")
 public class User {
     @Id
-    private String email; // Unique identifier
-
+    private String email;
     private String name;
-    private String password; // Consider hashing this (e.g., with BCrypt)
+    private String password;
     private String year;
 
-    // Relationships to Interest nodes
-    @Relationship(type = "INTERESTED_IN", direction = Relationship.Direction.OUTGOING)
-    private Set<Interest> interests;
+    @Relationship(type = "INTERESTED_IN")
+    private Set<Interest> interests = new HashSet<>();
 
-    // Relationships to Subject nodes
-    @Relationship(type = "STUDIES", direction = Relationship.Direction.OUTGOING)
-    private Set<Subject> subjects;
+    @Relationship(type = "STUDIES")
+    private Set<Subject> subjects = new HashSet<>();
 
-    // Relationships to CareerAspiration nodes
-    @Relationship(type = "ASPIRES_TO", direction = Relationship.Direction.OUTGOING)
-    private Set<CareerAspiration> careerAspirations;
+    @Relationship(type = "ASPIRES_TO")
+    private Set<CareerAspiration> careerAspirations = new HashSet<>();
 }
