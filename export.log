@@ -1,0 +1,176 @@
+2025-04-16 00:15:52,868 - INFO - Executing Neo4j query
+2025-04-16 00:15:55,018 - ERROR - Error exporting CSV: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+Traceback (most recent call last):
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 80, in export_to_csv
+    results = neo4j_conn.run_query(query)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 34, in run_query
+    result = session.run(query, parameters or {})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 313, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 136, in _connect
+    super()._connect(
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 199, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 662, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 408, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 230, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 624, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 430, in open
+    connection.hello()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt5.py", line 740, in hello
+    self.fetch_all()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 879, in fetch_all
+    detail_delta, summary_delta = self.fetch_message()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 864, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt5.py", line 500, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_common.py", line 295, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.AuthError: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-04-16 00:19:15,808 - INFO - Executing Neo4j query
+2025-04-16 00:19:17,895 - ERROR - Error exporting CSV: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+Traceback (most recent call last):
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 80, in export_to_csv
+    results = neo4j_conn.run_query(query)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 34, in run_query
+    result = session.run(query, parameters or {})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 313, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 136, in _connect
+    super()._connect(
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 199, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 662, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 408, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 230, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 624, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 430, in open
+    connection.hello()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt5.py", line 740, in hello
+    self.fetch_all()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 879, in fetch_all
+    detail_delta, summary_delta = self.fetch_message()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 864, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt5.py", line 500, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_common.py", line 295, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.AuthError: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-04-16 00:19:31,480 - INFO - Executing Neo4j query
+2025-04-16 00:19:33,553 - ERROR - Error exporting CSV: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+Traceback (most recent call last):
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 80, in export_to_csv
+    results = neo4j_conn.run_query(query)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 34, in run_query
+    result = session.run(query, parameters or {})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 313, in run
+    self._connect(self._config.default_access_mode)
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 136, in _connect
+    super()._connect(
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\workspace.py", line 199, in _connect
+    self._connection = self._pool.acquire(**acquire_kwargs_)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 662, in acquire
+    return self._acquire(
+           ^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 408, in _acquire
+    return connection_creator()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 230, in connection_creator
+    connection = self.opener(
+                 ^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_pool.py", line 624, in opener
+    return Bolt.open(
+           ^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 430, in open
+    connection.hello()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt5.py", line 740, in hello
+    self.fetch_all()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 879, in fetch_all
+    detail_delta, summary_delta = self.fetch_message()
+                                  ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 864, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt5.py", line 500, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_common.py", line 295, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.AuthError: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-04-16 00:22:13,133 - INFO - Executing Neo4j query
+2025-04-16 00:22:22,890 - INFO - Retrieved 390 records from Neo4j
+2025-04-16 00:22:22,978 - INFO - Created DataFrame with 390 rows
+2025-04-16 00:22:23,267 - INFO - CSV exported successfully to exported_data.csv
+2025-04-16 00:27:38,267 - INFO - Executing Neo4j query
+2025-04-16 00:27:42,171 - INFO - Retrieved 390 records from Neo4j
+2025-04-16 00:27:42,372 - INFO - Created DataFrame with 390 rows
+2025-04-16 00:27:42,617 - INFO - CSV exported successfully to exported_data.csv
+2025-04-16 00:34:24,153 - INFO - Executing Neo4j query
+2025-04-16 00:34:26,442 - ERROR - Error exporting CSV: {code: Neo.ClientError.Statement.SyntaxError} {message: In a WITH/RETURN with DISTINCT or an aggregation, it is not possible to access variables declared before the WITH/RETURN: d (line 24, column 33 (offset: 1207))
+"        ORDER BY d.nom_diplome, d.unique_id"
+                                 ^}
+Traceback (most recent call last):
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 67, in export_to_csv
+    results = neo4j_conn.run_query(query)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\modelService\modelServ\fetch.py", line 34, in run_query
+    result = session.run(query, parameters or {})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\session.py", line 328, in run
+    self._auto_result._run(
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\result.py", line 236, in _run
+    self._attach()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\work\result.py", line 430, in _attach
+    self._connection.fetch_message()
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_common.py", line 184, in inner
+    func(*args, **kwargs)
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt.py", line 864, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_bolt5.py", line 500, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "C:\Users\J.P.M\Desktop\model microservice\venv\Lib\site-packages\neo4j\_sync\io\_common.py", line 254, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError} {message: In a WITH/RETURN with DISTINCT or an aggregation, it is not possible to access variables declared before the WITH/RETURN: d (line 24, column 33 (offset: 1207))
+"        ORDER BY d.nom_diplome, d.unique_id"
+                                 ^}
+2025-04-16 00:39:04,773 - INFO - Executing Neo4j query
+2025-04-16 00:39:11,348 - INFO - Retrieved 390 records from Neo4j
+2025-04-16 00:39:11,365 - INFO - Created DataFrame with 390 rows
+2025-04-16 00:39:11,390 - INFO - CSV exported successfully to exported_data.csv
+2025-04-16 00:39:11,391 - WARNING - Original CSV (data.csv) not found, skipping comparison
+2025-04-16 21:32:47,887 - INFO - Executing Neo4j query
+2025-04-16 21:32:54,782 - INFO - Retrieved 261 records from Neo4j
+2025-04-16 21:32:54,798 - INFO - Created DataFrame with 261 rows
+2025-04-16 21:32:54,814 - INFO - CSV exported successfully to exported_data.csv
+2025-04-16 21:32:54,816 - WARNING - Original CSV (data.csv) not found, skipping comparison
