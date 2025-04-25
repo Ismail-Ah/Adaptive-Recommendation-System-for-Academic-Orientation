@@ -3,15 +3,9 @@ package org.example.userservicef.Controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.userservicef.DTO.UserDTO;
+import org.example.userservicef.Model.*;
+import org.example.userservicef.Repository.*;
 import org.example.userservicef.Security.JwtUtil;
-import org.example.userservicef.Model.User;
-import org.example.userservicef.Model.Interest;
-import org.example.userservicef.Model.Subject;
-import org.example.userservicef.Model.CareerAspiration;
-import org.example.userservicef.Repository.UserRepository;
-import org.example.userservicef.Repository.InterestRepository;
-import org.example.userservicef.Repository.SubjectRepository;
-import org.example.userservicef.Repository.CareerAspirationRepository;
 import org.example.userservicef.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,9 +44,6 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private InterestRepository interestRepository;
-
-    @Autowired
     private SubjectRepository subjectRepository;
 
     @Autowired
@@ -58,6 +51,18 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private YearRepository yearRepository;
+
+    @Autowired
+    private FiliereRepository filiereRepository;
+
+    @Autowired
+    private DureeRepository dureeRepository;
+
+    @Autowired
+    private MontionBacRepository montionBacRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody UserDTO userDTO) {
@@ -73,13 +78,37 @@ public class AuthController {
         user.setEmail(userDTO.getEmail());
         user.setName(userDTO.getName());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        user.setYear(userDTO.getYear());
 
-        Set<Interest> interests = userDTO.getInterests().stream()
-                .map(name -> interestRepository.findById(name)
-                        .orElseGet(() -> interestRepository.save(new Interest(name))))
-                .collect(Collectors.toSet());
-        user.setInterests(interests);
+        // Handle Year relationship
+        Year year = yearRepository.findByName(userDTO.getYear());
+        if (year == null) {
+            year = new Year(userDTO.getYear());
+            yearRepository.save(year);
+        }
+        user.setYear(year);
+
+        // Handle Filiere relationship
+        Filiere filiere = filiereRepository.findByName(userDTO.getFiliere());
+        if (filiere == null) {
+            filiere = new Filiere(userDTO.getFiliere());
+            filiereRepository.save(filiere);
+        }
+        user.setFiliere(filiere);
+
+        Duree duree = dureeRepository.findByName(userDTO.getDuree());
+        if (duree == null) {
+            duree = new Duree(userDTO.getDuree());
+            dureeRepository.save(duree);
+        }
+        user.setDuree(duree);
+
+        MontionBac montionBac = montionBacRepository.findByName(userDTO.getMontionBac());
+        if (montionBac == null) {
+            montionBac = new MontionBac(userDTO.getMontionBac());
+            montionBacRepository.save(montionBac);
+        }
+        user.setMontionBac(montionBac);
+        
 
         Set<Subject> subjects = userDTO.getSubjects().stream()
                 .map(name -> subjectRepository.findById(name)
@@ -103,8 +132,10 @@ public class AuthController {
                 user.getEmail(),
                 user.getEmail(),
                 user.getName(),
-                user.getYear(),
-                interests.stream().map(Interest::getName).collect(Collectors.toSet()),
+                user.getYear().getName(), // Return year name
+                user.getFiliere().getName(), // Return filiere name
+                user.getDuree().getName(), 
+                user.getMontionBac().getName(), 
                 subjects.stream().map(Subject::getName).collect(Collectors.toSet()),
                 careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet())
         ));
@@ -128,11 +159,14 @@ public class AuthController {
             throw new Exception("User not found after authentication");
         }
 
-        logger.info("Raw User from repository: email={}, name={}, year={}, interests={}, subjects={}, careerAspirations={}",
+        logger.info("Raw User from repository: email={}, name={}, year={}, filiere={}, interests={}, subjects={}, careerAspirations={}",
                 user.getEmail(),
                 user.getName(),
-                user.getYear(),
-                user.getInterests(),
+                user.getYear() != null ? user.getYear().getName() : "null",
+                user.getFiliere() != null ? user.getFiliere().getName() : "null",
+                user.getDuree() != null ? user.getDuree().getName() : null,
+                user.getMontionBac() != null ? user.getMontionBac().getName() : "null",
+                
                 user.getSubjects(),
                 user.getCareerAspirations());
 
@@ -142,8 +176,10 @@ public class AuthController {
                 user.getEmail(),
                 user.getEmail(),
                 user.getName(),
-                user.getYear(),
-                user.getInterests() != null ? user.getInterests().stream().map(Interest::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getYear() != null ? user.getYear().getName() : "null", // Return year name
+                user.getFiliere() != null ? user.getFiliere().getName() : "null", // Return filiere name
+                user.getDuree() != null ? user.getDuree().getName() : null, // Return filiere name
+                user.getMontionBac() != null ? user.getMontionBac().getName() : "null", // Return filiere name
                 user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet(),
                 user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet()
         ));
@@ -152,52 +188,80 @@ public class AuthController {
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody UserDTO updatedUserDTO, Principal principal) {
         logger.info("Updating profile for user: {}", principal != null ? principal.getName() : "null");
-
+    
         if (principal == null || !principal.getName().equals(updatedUserDTO.getEmail())) {
             logger.warn("Unauthorized attempt to update profile for: {}. Principal: {}",
                     updatedUserDTO.getEmail(), principal != null ? principal.getName() : "null");
             return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).body("Unauthorized");
         }
-
+    
         User existingUser = userRepository.findByEmail(principal.getName());
         if (existingUser == null) {
             logger.error("User not found: {}", principal.getName());
             return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body("User not found");
         }
-
+    
         existingUser.setName(updatedUserDTO.getName());
-        existingUser.setYear(updatedUserDTO.getYear());
-
-        Set<Interest> interests = updatedUserDTO.getInterests().stream()
-                .map(name -> interestRepository.findById(name)
-                        .orElseGet(() -> interestRepository.save(new Interest(name))))
-                .collect(Collectors.toSet());
-        existingUser.setInterests(interests);
-
+    
+        // ✅ Step 1: Remove all existing relationships
+        userDetailsService.deleteUserRelationships(existingUser.getEmail());
+    
+        // ✅ Step 2: Assign new relationships
+        Year year = yearRepository.findByName(updatedUserDTO.getYear());
+        if (year == null) {
+            year = new Year(updatedUserDTO.getYear());
+            yearRepository.save(year);
+        }
+        existingUser.setYear(year);
+    
+        Filiere filiere = filiereRepository.findByName(updatedUserDTO.getFiliere());
+        if (filiere == null) {
+            filiere = new Filiere(updatedUserDTO.getFiliere());
+            filiereRepository.save(filiere);
+        }
+        existingUser.setFiliere(filiere);
+    
+        Duree duree = dureeRepository.findByName(updatedUserDTO.getDuree());
+        if (duree == null) {
+            duree = new Duree(updatedUserDTO.getDuree());
+            dureeRepository.save(duree);
+        }
+        existingUser.setDuree(duree);
+    
+        MontionBac montionBac = montionBacRepository.findByName(updatedUserDTO.getMontionBac());
+        if (montionBac == null) {
+            montionBac = new MontionBac(updatedUserDTO.getMontionBac());
+            montionBacRepository.save(montionBac);
+        }
+        existingUser.setMontionBac(montionBac);
+    
         Set<Subject> subjects = updatedUserDTO.getSubjects().stream()
                 .map(name -> subjectRepository.findById(name)
                         .orElseGet(() -> subjectRepository.save(new Subject(name))))
                 .collect(Collectors.toSet());
         existingUser.setSubjects(subjects);
-
+    
         Set<CareerAspiration> careerAspirations = updatedUserDTO.getCareerAspirations().stream()
                 .map(name -> careerAspirationRepository.findById(name)
                         .orElseGet(() -> careerAspirationRepository.save(new CareerAspiration(name))))
                 .collect(Collectors.toSet());
         existingUser.setCareerAspirations(careerAspirations);
-
+    
         userRepository.save(existingUser);
-
+    
         logger.info("Profile updated successfully for: {}", existingUser.getEmail());
         return ResponseEntity.ok(new UserResponse(
                 existingUser.getEmail(),
                 existingUser.getName(),
-                existingUser.getYear(),
-                interests.stream().map(Interest::getName).collect(Collectors.toSet()),
+                existingUser.getYear().getName(),
+                existingUser.getFiliere().getName(),
+                existingUser.getDuree().getName(),
+                existingUser.getMontionBac().getName(),
                 subjects.stream().map(Subject::getName).collect(Collectors.toSet()),
                 careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet())
         ));
     }
+    
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
@@ -222,11 +286,49 @@ public class AuthController {
         return ResponseEntity.ok(new UserResponse(
                 user.getEmail(),
                 user.getName(),
-                user.getYear(),
-                user.getInterests() != null ? user.getInterests().stream().map(Interest::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getYear() != null ? user.getYear().getName() : "null", // Return year name
+                user.getFiliere() != null ? user.getFiliere().getName() : "null", // Return filiere name
+                user.getDuree() != null ? user.getDuree().getName() : null, // Return filiere name
+                user.getMontionBac() != null ? user.getMontionBac().getName() : "null", // Return filiere name
                 user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet(),
                 user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet()
         ));
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers(Principal principal) {
+        if (principal == null) {
+            logger.warn("No authenticated user found");
+            return null;
+        }
+
+        logger.info("Fetching details for user: {}", principal.getName());
+
+        User user = userRepository.findByEmail(principal.getName());
+        if (user == null) {
+            logger.error("Authenticated user not found in database: {}", principal.getName());
+            return null;
+        }
+
+        if (!user.getRole().equals("ADMIN")) {
+            logger.error("Unauthorized!", principal.getName());
+            return null;
+        }
+
+        List<User> users = userRepository.findAll();
+        List<UserDTO> usersDTO = new ArrayList<>();
+        for(User u : users){
+            UserDTO userDTO = new UserDTO();
+            userDTO.setEmail(u.getEmail());
+            userDTO.setDuree( user.getDuree() != null ? user.getDuree().getName() : null);
+            userDTO.setFiliere(user.getFiliere() != null ? user.getFiliere().getName() : "null");
+            userDTO.setMontionBac(user.getMontionBac() != null ? user.getMontionBac().getName() : "null");
+            userDTO.setSubjects(user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet());
+            userDTO.setCareerAspirations(user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet());
+            usersDTO.add(userDTO);
+        }
+
+        return ResponseEntity.ok(usersDTO);
     }
 }
 
@@ -235,8 +337,10 @@ record AuthResponse(
         String id,
         String email,
         String name,
-        String year,
-        Set<String> interests,
+        String year, 
+        String filiere,
+        int duree,
+        String montionBac,
         Set<String> subjects,
         Set<String> careerAspirations
 ) {}
@@ -244,8 +348,10 @@ record AuthResponse(
 record UserResponse(
         String email,
         String name,
-        String year,
-        Set<String> interests,
+        String year, 
+        String filiere, 
+        int duree,
+        String montionBac,
         Set<String> subjects,
         Set<String> careerAspirations
 ) {}

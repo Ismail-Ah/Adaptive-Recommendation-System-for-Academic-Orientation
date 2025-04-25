@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { UserPlus } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext'; // Adjust the import path based on your file structure
+import { useAuth } from '../contexts/AuthContext';
 
 // Moroccan curriculum-based interests and subjects
 const interests = [
@@ -41,6 +41,21 @@ const careerAspirations = [
   'Arts et Lettres',
 ];
 
+// Predefined filieres
+const filieres = [
+  'Sciences Mathématiques',
+  'Sciences Expérimentales',
+  'Sciences Économiques',
+  'Lettres et Sciences Humaines',
+  'Techniques',
+];
+
+// Predefined study durations
+const studyDurations = ['2 ans', '3 ans', '4 ans', '5 ans ou plus'];
+
+// Predefined Bac mentions (common in Moroccan system)
+const bacMentions = ['Passable', 'Assez Bien', 'Bien', 'Très Bien'];
+
 // Schema for registration
 const registerSchema = z.object({
   name: z
@@ -49,11 +64,14 @@ const registerSchema = z.object({
     .regex(/^[a-zA-Z\s]+$/, 'Le nom doit contenir uniquement des lettres et des espaces'),
   email: z.string().email('Veuillez entrer un email valide'),
   year: z.enum(['1ère Bac', '2ème Bac']),
+  filiere: z.string().min(1, 'Sélectionnez une filière'),
   interests: z.array(z.string()).min(1, 'Sélectionnez au moins un intérêt'),
   subjects: z.array(z.string()).min(1, 'Sélectionnez au moins une matière que vous aimez'),
   careerAspirations: z
     .array(z.string())
     .min(1, 'Sélectionnez au moins une aspiration professionnelle'),
+  studyDuration: z.string().min(1, 'Sélectionnez la durée d’étude voulue'),
+  bacMention: z.string().min(1, 'Sélectionnez une mention'),
   password: z
     .string()
     .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
@@ -70,33 +88,53 @@ const registerSchema = z.object({
 type RegisterForm = z.infer<typeof registerSchema>;
 
 function Register() {
-  const { register: registerUser, error } = useAuth(); // Use the register function from AuthContext
-  const navigate = useNavigate(); // For redirecting after successful registration
+  const { register: registerUser, error } = useAuth();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
 
+  const [isBacFieldsDisabled, setIsBacFieldsDisabled] = useState(true);
+  const [isMentionBacDisabled, setIsMentionBacDisabled] = useState(true);
+
+  const selectedYear = watch('year');
+
+  React.useEffect(() => {
+    if (selectedYear === '1ère Bac' || selectedYear === '2ème Bac') {
+      setIsBacFieldsDisabled(false);
+      if (selectedYear === '2ème Bac') {
+        setIsMentionBacDisabled(false);
+      } else {
+        setIsMentionBacDisabled(true);
+      }
+    } else {
+      setIsBacFieldsDisabled(true);
+      setIsMentionBacDisabled(true);
+    }
+  }, [selectedYear]);
+
   const onSubmit = async (data: RegisterForm) => {
     try {
-      // Call the register function from AuthContext
       await registerUser({
         name: data.name,
         email: data.email,
         year: data.year,
+        filiere: data.filiere,
         interests: data.interests,
         subjects: data.subjects,
         careerAspirations: data.careerAspirations,
+        duree: parseInt(data.studyDuration[0]),
+        montionBac: data.bacMention,
         password: data.password,
       });
-      // On success, redirect to a dashboard or home page
       navigate('/profile');
     } catch (err) {
       console.error('Erreur d’inscription:', err);
-      // Error is already handled in the AuthContext (stored in state.error)
     }
   };
 
@@ -110,55 +148,133 @@ function Register() {
             <p className="text-gray-600 mt-2">Rejoignez notre plateforme d’orientation académique</p>
           </div>
 
-          {/* Display error from AuthContext if it exists */}
           {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Nom Complet
-              </label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Entrez votre nom complet"
-                error={!!errors.name}
-                helperText={errors.name?.message}
-                {...register('name')}
-              />
-            </div>
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+  <div className="flex-1">
+    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+      Nom Complet
+    </label>
+    <Input
+      id="name"
+      type="text"
+      placeholder="Entrez votre nom complet"
+      error={!!errors.name}
+      helperText={errors.name?.message}
+      {...register('name')}
+    />
+  </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Entrez votre email"
-                error={!!errors.email}
-                helperText={errors.email?.message}
-                {...register('email')}
-              />
-            </div>
+  <div className="flex-1">
+    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+      Email
+    </label>
+    <Input
+      id="email"
+      type="email"
+      placeholder="Entrez votre email"
+      error={!!errors.email}
+      helperText={errors.email?.message}
+      {...register('email')}
+    />
+  </div>
+</div>
 
-            <div>
-              <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
-                Année
-              </label>
-              <select
-                id="year"
-                {...register('year')}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="1ère Bac">1ère Bac</option>
-                <option value="2ème Bac">2ème Bac</option>
-              </select>
-              {errors.year && (
-                <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
-              )}
-            </div>
+<div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+    <div className="flex-1">
+      <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
+        Année Académique
+      </label>
+      <select
+        id="year"
+        {...register('year')}
+        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      >
+        <option value="">Sélectionnez une année</option>
+        <option value="1ère Bac">1ère Bac</option>
+        <option value="2ème Bac">2ème Bac</option>
+      </select>
+      {errors.year && (
+        <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
+      )}
+    </div>
 
+    <div className="flex-1">
+      <label htmlFor="filiere" className="block text-sm font-medium text-gray-700 mb-1">
+        Filière
+      </label>
+      <select
+        id="filiere"
+        {...register('filiere')}
+        disabled={isBacFieldsDisabled}
+        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+          isBacFieldsDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
+        }`}
+      >
+        <option value="">Sélectionnez une filière</option>
+        {filieres.map((filiere) => (
+          <option key={filiere} value={filiere}>
+            {filiere}
+          </option>
+        ))}
+      </select>
+      {errors.filiere && (
+        <p className="mt-1 text-sm text-red-600">{errors.filiere.message}</p>
+      )}
+    </div>
+  </div>
+
+  {/* Durée d’Étude Voulue Post-Bac and Mention Bac in one line */}
+  <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+    <div className="flex-1">
+      <label htmlFor="studyDuration" className="block text-sm font-medium text-gray-700 mb-1">
+        Durée d’Étude Voulue Post-Bac
+      </label>
+      <select
+        id="studyDuration"
+        {...register('studyDuration')}
+        disabled={isBacFieldsDisabled}
+        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+          isBacFieldsDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
+        }`}
+      >
+        <option value="">Sélectionnez une durée</option>
+        {studyDurations.map((duration) => (
+          <option key={duration} value={duration}>
+            {duration}
+          </option>
+        ))}
+      </select>
+      {errors.studyDuration && (
+        <p className="mt-1 text-sm text-red-600">{errors.studyDuration.message}</p>
+      )}
+    </div>
+
+    <div className="flex-1">
+      <label htmlFor="bacMention" className="block text-sm font-medium text-gray-700 mb-1">
+        Mention Bac
+      </label>
+      <select
+        id="bacMention"
+        {...register('bacMention')}
+        disabled={isMentionBacDisabled}
+        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+          isMentionBacDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
+        }`}
+      >
+        <option value="">Sélectionnez une mention</option>
+        {bacMentions.map((mention) => (
+          <option key={mention} value={mention}>
+            {mention}
+          </option>
+        ))}
+      </select>
+      {errors.bacMention && (
+        <p className="mt-1 text-sm text-red-600">{errors.bacMention.message}</p>
+      )}
+    </div>
+  </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Intérêts
@@ -282,16 +398,8 @@ function Register() {
                 'Créer un Compte'
               )}
             </Button>
+            {/* Interests, Subjects, Career Aspirations, Password, Confirm Password, and Submit Button... */}
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Vous avez déjà un compte ?{' '}
-              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                Connectez-vous ici
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>

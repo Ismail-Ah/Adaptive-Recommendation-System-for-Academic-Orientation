@@ -1,0 +1,102 @@
+Nom_Diplôme,Subjects,Career,Filiere,Durée,Mention_Bac
+Licence en Informatique,"['Programmation', 'Réseaux']","['Ingenierie']",Informatique,3,Mention Très Bien
+Master en Génie Mécanique,"['Mécanique', 'Mathématiques']","['Ingenierie']",Sciences Physique,5,Mention Bien
+Technicien Spécialisé en Réseaux,"['Réseaux', 'Programmation']","['Ingenierie']",Informatique,2,Mention Assez Bien
+Licence en Economie,"['Economie', 'Gestion']","['Economie']",Sciences Economiques,3,Mention Très Bien
+Diplôme de Médecine,"['Médecine', 'Biologie']","['Medecine']",Sciences de la Vie,5,Mention Très Bien
+Licence en Physique,"['Physique', 'Mathématiques']","['Ingenierie']",Sciences Physique,3,Mention Bien
+Master en IA,"['Programmation', 'Mathématiques']","['Ingenierie']",Informatique,5,Mention Très Bien
+Technicien Spécialisé en Électronique,"['Électronique', 'Physique']","['Ingenierie']",Sciences Physique,2,Mention Assez Bien
+Licence en Biologie,"['Biologie', 'Chimie']","['Agriculture']",Sciences de la Vie,3,Mention Bien
+Master en Gestion,"['Gestion', 'Economie']","['Gestion']",Sciences Economiques,5,Mention Très Bien
+Diplôme de Pharmacie,"['Pharmacie', 'Chimie']","['Pharmacie']",Sciences de la Vie,5,Mention Bien
+Licence en Mathématiques,"['Mathématiques']","['Ingenierie']",Sciences Mathématiques,3,Mention Très Bien
+Master en Droit,"['Droit', 'Gestion']","['Droit']",Lettres,5,Mention Assez Bien
+Licence en Informatique,"['Programmation', 'Mathématiques']","['Ingenierie']",Informatique,3,Mention Bien
+Master en Génie Mécanique,"['Mécanique', 'Physique']","['Ingenierie']",Sciences Physique,5,Mention Très Bien
+Technicien Spécialisé en Réseaux,"['Réseaux']","['Ingenierie']",Informatique,2,Mention Passable
+Licence en Economie,"['Economie']","['Economie']",Sciences Economiques,3,Mention Assez Bien
+Diplôme de Médecine,"['Médecine', 'Pharmacie']","['Medecine']",Sciences de la Vie,5,Mention Très Bien
+Licence en Physique,"['Physique']","['Ingenierie']",Sciences Physique,3,Mention Très Bien
+Master en IA,"['Programmation', 'Réseaux']","['Ingenierie']",Informatique,5,Mention Bien
+Technicien Spécialisé en Électronique,"['Électronique']","['Ingenierie']",Sciences Physique,2,Mention Bien
+Licence en Biologie,"['Biologie']","['Agriculture']",Sciences de la Vie,3,Mention Assez Bien
+Master en Gestion,"['Gestion']","['Gestion']",Sciences Economiques,5,Mention Bien
+Diplôme de Pharmacie,"['Pharmacie', 'Biologie']","['Pharmacie']",Sciences de la Vie,5,Mention Très Bien
+Licence en Mathématiques,"['Mathématiques', 'Physique']","['Ingenierie']",Sciences Mathématiques,3,Mention Bien
+Master en Droit,"['Droit']","['Droit']",Lettres,5,Mention Très Bien
+Licence en Informatique,"['Réseaux', 'Programmation']","['Ingenierie']",Informatique,3,Mention Assez Bien
+Master en Génie Mécanique,"['Mécanique']","['Ingenierie']",Sciences Physique,5,Mention Assez Bien
+Technicien Spécialisé en Réseaux,"['Réseaux', 'Électronique']","['Ingenierie']",Informatique,2,Mention Très Bien
+Licence en Economie,"['Economie', 'Mathématiques']","['Economie']",Sciences Economiques,3,Mention Bien
+Diplôme de Médecine,"['Médecine']","['Medecine']",Sciences de la Vie,5,Mention Bien
+Licence en Physique,"['Physique', 'Mathématiques']","['Ingenierie']",Sciences Physique,3,Mention Assez Bien
+Master en IA,"['Mathématiques', 'Programmation']","['Ingenierie']",Informatique,5,Mention Très Bien
+Technicien Spécialisé en Électronique,"['Électronique', 'Mécanique']","['Ingenierie']",Sciences Physique,2,Mention Passable
+Licence en Biologie,"['Biologie', 'Chimie']","['Agriculture']",Sciences de la Vie,3,Mention Très Bien
+Master en Gestion,"['Economie', 'Gestion']","['Gestion']",Sciences Economiques,5,Mention Assez Bien
+Diplôme de Pharmacie,"['Pharmacie']","['Pharmacie']",Sciences de la Vie,5,Mention Bien
+Licence en Mathématiques,"['Mathématiques']","['Ingenierie']",Sciences Mathématiques,3,Mention Assez Bien
+Master en Droit,"['Droit', 'Economie']","['Droit']",Lettres,5,Mention Bien
+Licence en Informatique,"['Programmation']","['Ingenierie']",Informatique,3,Mention Très Bien
+Master en Génie Mécanique,"['Mécanique', 'Électronique']","['Ingenierie']",Sciences Physique,5,Mention Très Bien
+Technicien Spécialisé en Réseaux,"['Réseaux', 'Programmation']","['Ingenierie']",Informatique,2,Mention Bien
+Licence en Economie,"['Gestion', 'Economie']","['Economie']",Sciences Economiques,3,Mention Très Bien
+Diplôme de Médecine,"['Médecine', 'Biologie']","['Medecine']",Sciences de la Vie,5,Mention Assez Bien
+Licence en Physique,"['Physique']","['Ingenierie']",Sciences Physique,3,Mention Bien
+Master en IA,"['Programmation']","['Ingenierie']",Informatique,5,Mention Assez Bien
+Technicien Spécialisé en Électronique,"['Électronique', 'Physique']","['Ingenierie']",Sciences Physique,2,Mention Très Bien
+Licence en Biologie,"['Chimie', 'Biologie']","['Agriculture']",Sciences de la Vie,3,Mention Bien
+Master en Gestion,"['Gestion', 'Economie']","['Gestion']",Sciences Economiques,5,Mention Très Bien
+Diplôme de Pharmacie,"['Pharmacie', 'Médecine']","['Pharmacie']",Sciences de la Vie,5,Mention Assez Bien
+Licence en Mathématiques,"['Mathématiques', 'Programmation']","['Ingenierie']",Sciences Mathématiques,3,Mention Très Bien
+Master en Droit,"['Droit']","['Droit']",Lettres,5,Mention Bien
+Licence en Informatique,"['Réseaux']","['Ingenierie']",Informatique,3,Mention Bien
+Master en Génie Mécanique,"['Mécanique', 'Physique']","['Ingenierie']",Sciences Physique,5,Mention Assez Bien
+Technicien Spécialisé en Réseaux,"['Programmation', 'Réseaux']","['Ingenierie']",Informatique,2,Mention Très Bien
+Licence en Economie,"['Economie']","['Economie']",Sciences Economiques,3,Mention Assez Bien
+Diplôme de Médecine,"['Médecine', 'Chimie']","['Medecine']",Sciences de la Vie,5,Mention Très Bien
+Licence en Physique,"['Mathématiques', 'Physique']","['Ingenierie']",Sciences Physique,3,Mention Très Bien
+Master en IA,"['Réseaux', 'Programmation']","['Ingenierie']",Informatique,5,Mention Bien
+Technicien Spécialisé en Électronique,"['Électronique']","['Ingenierie']",Sciences Physique,2,Mention Assez Bien
+Licence en Biologie,"['Biologie']","['Agriculture']",Sciences de la Vie,3,Mention Très Bien
+Master en Gestion,"['Gestion']","['Gestion']",Sciences Economiques,5,Mention Assez Bien
+Diplôme de Pharmacie,"['Pharmacie', 'Biologie']","['Pharmacie']",Sciences de la Vie,5,Mention Très Bien
+Licence en Mathématiques,"['Mathématiques', 'Physique']","['Ingenierie']",Sciences Mathématiques,3,Mention Bien
+Master en Droit,"['Droit', 'Gestion']","['Droit']",Lettres,5,Mention Très Bien
+Licence en Informatique,"['Programmation', 'Réseaux']","['Ingenierie']",Informatique,3,Mention Assez Bien
+Master en Génie Mécanique,"['Mécanique']","['Ingenierie']",Sciences Physique,5,Mention Bien
+Technicien Spécialisé en Réseaux,"['Réseaux']","['Ingenierie']",Informatique,2,Mention Bien
+Licence en Economie,"['Economie', 'Gestion']","['Economie']",Sciences Economiques,3,Mention Très Bien
+Diplôme de Médecine,"['Médecine']","['Medecine']",Sciences de la Vie,5,Mention Bien
+Licence en Physique,"['Physique', 'Électronique']","['Ingenierie']",Sciences Physique,3,Mention Assez Bien
+Master en IA,"['Programmation', 'Mathématiques']","['Ingenierie']",Informatique,5,Mention Très Bien
+Technicien Spécialisé en Électronique,"['Électronique', 'Mécanique']","['Ingenierie']",Sciences Physique,2,Mention Très Bien
+Licence en Biologie,"['Biologie', 'Chimie']","['Agriculture']",Sciences de la Vie,3,Mention Bien
+Master en Gestion,"['Economie', 'Gestion']","['Gestion']",Sciences Economiques,5,Mention Très Bien
+Diplôme de Pharmacie,"['Pharmacie']","['Pharmacie']",Sciences de la Vie,5,Mention Assez Bien
+Licence en Mathématiques,"['Mathématiques']","['Ingenierie']",Sciences Mathématiques,3,Mention Très Bien
+Master en Droit,"['Droit']","['Droit']",Lettres,5,Mention Assez Bien
+Licence en Informatique,"['Programmation']","['Ingenierie']",Informatique,3,Mention Bien
+Master en Génie Mécanique,"['Mécanique', 'Mathématiques']","['Ingenierie']",Sciences Physique,5,Mention Très Bien
+Technicien Spécialisé en Réseaux,"['Réseaux', 'Programmation']","['Ingenierie']",Informatique,2,Mention Assez Bien
+Licence en Economie,"['Gestion']","['Economie']",Sciences Economiques,3,Mention Bien
+Diplôme de Médecine,"['Médecine', 'Biologie']","['Medecine']",Sciences de la Vie,5,Mention Très Bien
+Licence en Physique,"['Physique']","['Ingenierie']",Sciences Physique,3,Mention Très Bien
+Master en IA,"['Mathématiques', 'Programmation']","['Ingenierie']",Informatique,5,Mention Assez Bien
+Technicien Spécialisé en Électronique,"['Électronique', 'Physique']","['Ingenierie']",Sciences Physique,2,Mention Bien
+Licence en Biologie,"['Chimie']","['Agriculture']",Sciences de la Vie,3,Mention Assez Bien
+Master en Gestion,"['Gestion', 'Economie']","['Gestion']",Sciences Economiques,5,Mention Très Bien
+Diplôme de Pharmacie,"['Pharmacie', 'Chimie']","['Pharmacie']",Sciences de la Vie,5,Mention Bien
+Licence en Mathématiques,"['Mathématiques', 'Programmation']","['Ingenierie']",Sciences Mathématiques,3,Mention Très Bien
+Master en Droit,"['Droit', 'Economie']","['Droit']",Lettres,5,Mention Bien
+Licence en Informatique,"['Réseaux', 'Programmation']","['Ingenierie']",Informatique,3,Mention Très Bien
+Master en Génie Mécanique,"['Mécanique', 'Physique']","['Ingenierie']",Sciences Physique,5,Mention Assez Bien
+Technicien Spécialisé en Réseaux,"['Réseaux']","['Ingenierie']",Informatique,2,Mention Très Bien
+Licence en Economie,"['Economie', 'Mathématiques']","['Economie']",Sciences Economiques,3,Mention Bien
+Diplôme de Médecine,"['Médecine', 'Pharmacie']","['Medecine']",Sciences de la Vie,5,Mention Assez Bien
+Licence en Physique,"['Physique', 'Mathématiques']","['Ingenierie']",Sciences Physique,3,Mention Bien
+Master en IA,"['Programmation']","['Ingenierie']",Informatique,5,Mention Très Bien
+Technicien Spécialisé en Électronique,"['Électronique']","['Ingenierie']",Sciences Physique,2,Mention Assez Bien
+Licence en Biologie,"['Biologie']","['Agriculture']",Sciences de la Vie,3,Mention Très Bien
+Master en Gestion,"['Gestion']","['Gestion']",Sciences Economiques,5,Mention Bien

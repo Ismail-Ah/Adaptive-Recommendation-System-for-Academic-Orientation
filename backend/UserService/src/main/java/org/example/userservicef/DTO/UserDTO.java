@@ -8,9 +8,12 @@ import java.util.Set;
 public class UserDTO {
     private String email;
     private String name;
-    private String password; // Only used in signup
-    private String year;
-    private Set<String> interests;         // Changed to Set<String>
-    private Set<String> subjects;          // Changed to Set<String>
-    private Set<String> careerAspirations; // Changed to Set<String>
+    private String password;
+    private String Role;
+    private String year; 
+    private String filiere;
+    private Set<String> subjects;
+    private Set<String> careerAspirations;
+    private String montionBac;
+    private int duree;
 }

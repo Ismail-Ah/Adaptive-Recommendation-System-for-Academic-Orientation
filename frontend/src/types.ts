@@ -3,9 +3,12 @@ export interface User {
   email: string;
   name: string;
   year: string;
+  filiere: string;
   interests: string[];
   subjects: string[];
   careerAspirations:string[];
+  duree:number;
+  montionBac:string;
 }
 
 export interface AuthState {
@@ -28,9 +31,12 @@ export interface RegisterData {
   password: string;
   name?: string;
   year?: string;
+  filiere? : string;
   interests?: string[];
   subjects?: string[];
   careerAspirations:string[];
+  duree:number;
+  montionBac:string;
 }
 
 export interface Subject {

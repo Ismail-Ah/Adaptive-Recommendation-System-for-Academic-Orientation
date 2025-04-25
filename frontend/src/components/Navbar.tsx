@@ -1,17 +1,16 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { GraduationCap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface NavbarProps {
-  className?: string; // Optional className prop
+  className?: string; // Propriété className optionnelle
 }
 
 const Navbar: React.FC<NavbarProps> = ({ className }) => {
   const { user } = useAuth();
   const location = useLocation();
 
-  // Function to get user initials
+  // Fonction pour obtenir les initiales de l'utilisateur
   const getInitials = (name: string | undefined): string => {
     if (!name) return '';
     const names = name.split(' ');
@@ -24,7 +23,6 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <GraduationCap className="h-8 w-8 text-blue-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">EduGuide</span>
             </Link>
           </div>
@@ -43,21 +41,21 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
               <>
                 {location.pathname === '/about' ? (
                   <Link to="/" className="px-3 py-2 rounded-md text-sm font-medium text-black-600 hover:text-blue-600">
-                    Home
+                    Accueil
                   </Link>
                 ) : (
                   <Link to="/about" className="px-3 py-2 rounded-md text-sm font-medium text-black-600 hover:text-blue-600">
-                    About Us
+                    À Propos
                   </Link>
                 )}
                 <Link to="/login" className="px-3 py-2 rounded-md text-sm font-medium text-black-600 hover:text-blue-600">
-                  Login
+                  Connexion
                 </Link>
                 <Link
                   to="/register"
                   className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
                 >
-                  Register
+                  Inscription
                 </Link>
               </>
             )}
