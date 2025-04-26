@@ -1,23 +1,22 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import type { AuthState, AuthContextType, RegisterData, User } from '../types';
-import { filter } from 'framer-motion/client';
 
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
   isLoading: false,
-  isCheckingAuth: true, // New flag to track initial auth check
+  isCheckingAuth: true,
   error: null,
   token: null,
 };
 
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = "http://localhost:8081";
 
 type AuthAction =
   | { type: 'AUTH_START' }
   | { type: 'AUTH_SUCCESS'; payload: { user: User; token: string } }
   | { type: 'AUTH_FAILURE'; payload: string }
-  | { type: 'AUTH_CHECKED' } // New action for when check is complete
+  | { type: 'AUTH_CHECKED' }
   | { type: 'LOGOUT' };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
@@ -77,11 +76,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           dispatch({ type: 'AUTH_FAILURE', payload: 'Invalid token' });
         });
     } else {
-      dispatch({ type: 'AUTH_CHECKED' }); // No token, mark check as complete
+      dispatch({ type: 'AUTH_CHECKED' });
     }
-  }, []); // Empty dependency array to run only on mount
+  }, []);
 
-  const login = useCallback(async (studentId: string, password: string) => {
+  const login = useCallback(async (studentId: string, password: string): Promise<User> => {
     try {
       dispatch({ type: 'AUTH_START' });
       const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
@@ -90,10 +89,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email: studentId, password }),
       });
       if (!response.ok) throw new Error('Invalid credentials');
-      const data: { token: string; id: string;montionBac:string;duree:number; email: string;filiere:string; name: string; year: string; interests: string[]; subjects: string[];careerAspirations:string[] } = await response.json();
-      const user = { id: data.id, email: data.email,filiere: data.filiere, name: data.name,montionBac:data.montionBac,duree:data.duree, year: data.year, interests: data.interests, subjects: data.subjects,careerAspirations:data.careerAspirations };
+      const data = await response.json();
+  
+      const user: User = {
+        id: data.id,
+        email: data.email,
+        filiere: data.filiere,
+        name: data.name,
+        montionBac: data.montionBac,
+        duree: data.duree,
+        year: data.year,
+        interests: data.interests,
+        subjects: data.subjects,
+        careerAspirations: data.careerAspirations,
+        role: data.role,
+      };
+  
       localStorage.setItem('token', data.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: data.token } });
+  
+      return user; // ✅ important
     } catch (error) {
       localStorage.removeItem('token');
       dispatch({ type: 'AUTH_FAILURE', payload: 'Invalid credentials' });
@@ -110,8 +125,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Registration failed');
-      const responseData: { token: string;montionBac:string;duree:number; id: string; email: string; name: string; filiere:string; year: string; interests: string[]; subjects: string[],careerAspirations:string[] } = await response.json();
-      const user = { id: responseData.id,montionBac:responseData.montionBac,duree:responseData.duree, email: responseData.email,filiere : responseData.filiere, name: responseData.name, year: responseData.year, interests: responseData.interests, subjects: responseData.subjects,careerAspirations:responseData.careerAspirations };
+      const responseData = await response.json();
+      const user: User = {
+        id: responseData.id,
+        email: responseData.email,
+        filiere: responseData.filiere,
+        name: responseData.name,
+        montionBac: responseData.montionBac,
+        duree: responseData.duree,
+        year: responseData.year,
+        interests: responseData.interests,
+        subjects: responseData.subjects,
+        careerAspirations: responseData.careerAspirations,
+        role: responseData.role,
+      };
       localStorage.setItem('token', responseData.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: responseData.token } });
     } catch (error) {
@@ -139,14 +166,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // AuthContext.tsx
   const updateProfile = useCallback(async (data: FormData) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No token found');
-      console.log("update profile with data : ");
-      console.log(data);
-      const response = await fetch(`${BACKEND_URL}/api/auth/profile`, { // Updated path
+      const response = await fetch(`${BACKEND_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -163,11 +187,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error;
     }
   }, []);
-    
-  
+
+  const isAdmin = useCallback(() => {
+    return state.user?.role === 'admin';
+  }, [state.user]);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout,updateProfile }}>
+    <AuthContext.Provider value={{ ...state, login, register, logout, updateProfile, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
