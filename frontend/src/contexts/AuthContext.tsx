@@ -80,7 +80,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+
   const login = useCallback(async (studentId: string, password: string, isAdmin: string): Promise<User> => {
+
     try {
       dispatch({ type: 'AUTH_START' });
       console.log('Attempting login with:', { email: studentId, password, role: isAdmin });
@@ -90,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: studentId, password, role: isAdmin }),
       });
-      
+
       console.log('Login response status:', response.status);
       const responseText = await response.text();
       console.log('Login response text:', responseText);
@@ -101,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const data = JSON.parse(responseText);
       console.log('Parsed login data:', data);
+
   
       const user: User = {
         id: data.id,
@@ -110,16 +113,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         montionBac: data.montionBac,
         duree: data.duree,
         year: data.year,
+
         interests: data.interests || [],
         subjects: data.subjects || [],
         careerAspirations: data.careerAspirations || [],
+
         role: data.role,
       };
   
       localStorage.setItem('token', data.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: data.token } });
   
+
       return user;
+
     } catch (error) {
       console.error('Login error:', error);
       localStorage.removeItem('token');
@@ -203,6 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = useCallback(() => {
     console.log('isAdmin check - User role:', state.user?.role);
     return state.user?.role?.toUpperCase() === 'ADMIN';
+
   }, [state.user]);
 
   return (

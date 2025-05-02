@@ -77,7 +77,7 @@ export const CSVUpload: React.FC = () => {
           };
           await axios.post('http://localhost:8080/api/diplomas/create', payload, {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: Bearer ${token},
               'Content-Type': 'application/json'
             }
           });
@@ -86,7 +86,7 @@ export const CSVUpload: React.FC = () => {
         await Promise.all(uploadPromises);
         setUploadResult({
           success: true,
-          message: `Successfully uploaded ${result.diplomas.length} diplomas!`,
+          message: Successfully uploaded ${result.diplomas.length} diplomas!,
           diplomas: result.diplomas
         });
         setFile(null);
@@ -124,7 +124,7 @@ export const CSVUpload: React.FC = () => {
         });
 
         if (missingFields.length > 0) {
-          errors.push(`Diploma ${index + 1}: Missing or invalid fields: ${missingFields.join(', ')}`);
+          errors.push(Diploma ${index + 1}: Missing or invalid fields: ${missingFields.join(', ')});
         } else {
           validDiplomas.push({
             id: uuidv4(),
@@ -216,7 +216,7 @@ export const CSVUpload: React.FC = () => {
       )}
 
       {uploadResult.message && (
-        <div className={`rounded-md mt-4 p-4 ${uploadResult.success ? 'bg-green-50' : 'bg-red-50'}`}>
+        <div className={rounded-md mt-4 p-4 ${uploadResult.success ? 'bg-green-50' : 'bg-red-50'}}>
           <div className="flex">
             <div className="flex-shrink-0">
               {uploadResult.success ? (
@@ -226,7 +226,7 @@ export const CSVUpload: React.FC = () => {
               )}
             </div>
             <div className="ml-3">
-              <h3 className={`text-sm font-medium ${uploadResult.success ? 'text-green-800' : 'text-red-800'}`}>
+              <h3 className={text-sm font-medium ${uploadResult.success ? 'text-green-800' : 'text-red-800'}}>
                 {uploadResult.success ? 'Success!' : 'Error'}
               </h3>
               <div className="mt-2 text-sm">

@@ -105,7 +105,7 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
     try {
       await axios.post('http://localhost:8080/api/diplomas/create', payload, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: Bearer ${token},
           'Content-Type': 'application/json'
         }
       });

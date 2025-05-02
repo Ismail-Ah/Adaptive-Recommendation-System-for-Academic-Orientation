@@ -137,7 +137,8 @@ public class AuthController {
                 user.getDuree().getName(), 
                 user.getMontionBac().getName(), 
                 subjects.stream().map(Subject::getName).collect(Collectors.toSet()),
-                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet())
+                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet()),
+                user.getRole()
         ));
     }
 
@@ -164,7 +165,7 @@ public class AuthController {
                 user.getName(),
                 user.getYear() != null ? user.getYear().getName() : "null",
                 user.getFiliere() != null ? user.getFiliere().getName() : "null",
-                user.getDuree() != null ? user.getDuree().getName() : null,
+                user.getDuree() != null ? user.getDuree().getName() : 0,
                 user.getMontionBac() != null ? user.getMontionBac().getName() : "null",
                 
                 user.getSubjects(),
@@ -178,10 +179,11 @@ public class AuthController {
                 user.getName(),
                 user.getYear() != null ? user.getYear().getName() : "null", // Return year name
                 user.getFiliere() != null ? user.getFiliere().getName() : "null", // Return filiere name
-                user.getDuree() != null ? user.getDuree().getName() : null, // Return filiere name
+                user.getDuree() != null ? user.getDuree().getName() : 0, // Return filiere name
                 user.getMontionBac() != null ? user.getMontionBac().getName() : "null", // Return filiere name
                 user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet(),
-                user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet()
+                user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getRole()
         ));
     }
 
@@ -258,7 +260,8 @@ public class AuthController {
                 existingUser.getDuree().getName(),
                 existingUser.getMontionBac().getName(),
                 subjects.stream().map(Subject::getName).collect(Collectors.toSet()),
-                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet())
+                careerAspirations.stream().map(CareerAspiration::getName).collect(Collectors.toSet()),
+                existingUser.getRole()
         ));
     }
     
@@ -288,10 +291,11 @@ public class AuthController {
                 user.getName(),
                 user.getYear() != null ? user.getYear().getName() : "null", // Return year name
                 user.getFiliere() != null ? user.getFiliere().getName() : "null", // Return filiere name
-                user.getDuree() != null ? user.getDuree().getName() : null, // Return filiere name
+                user.getDuree() != null ? user.getDuree().getName() : 0, // Return filiere name
                 user.getMontionBac() != null ? user.getMontionBac().getName() : "null", // Return filiere name
                 user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet(),
-                user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet()
+                user.getCareerAspirations() != null ? user.getCareerAspirations().stream().map(CareerAspiration::getName).collect(Collectors.toSet()) : Collections.emptySet(),
+                user.getRole()
         ));
     }
 
@@ -320,7 +324,7 @@ public class AuthController {
         for(User u : users){
             UserDTO userDTO = new UserDTO();
             userDTO.setEmail(u.getEmail());
-            userDTO.setDuree( user.getDuree() != null ? user.getDuree().getName() : null);
+            userDTO.setDuree( user.getDuree() != null ? user.getDuree().getName() : 0);
             userDTO.setFiliere(user.getFiliere() != null ? user.getFiliere().getName() : "null");
             userDTO.setMontionBac(user.getMontionBac() != null ? user.getMontionBac().getName() : "null");
             userDTO.setSubjects(user.getSubjects() != null ? user.getSubjects().stream().map(Subject::getName).collect(Collectors.toSet()) : Collections.emptySet());
@@ -342,7 +346,8 @@ record AuthResponse(
         int duree,
         String montionBac,
         Set<String> subjects,
-        Set<String> careerAspirations
+        Set<String> careerAspirations,
+        String role
 ) {}
 
 record UserResponse(
@@ -353,5 +358,6 @@ record UserResponse(
         int duree,
         String montionBac,
         Set<String> subjects,
-        Set<String> careerAspirations
+        Set<String> careerAspirations,
+        String role
 ) {}

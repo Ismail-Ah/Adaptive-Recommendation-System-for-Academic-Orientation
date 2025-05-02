@@ -4,6 +4,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { AdminSidebar } from './Sidebar';
 
 export const AdminLayout: React.FC = () => {
+
   const { isAuthenticated, isAdmin, user } = useAuth();
   
   console.log('AdminLayout - User:', user);
@@ -18,6 +19,7 @@ export const AdminLayout: React.FC = () => {
   if (!isAdmin()) {
     console.log('AdminLayout - Not admin, redirecting to home');
     return <Navigate to="/" />;
+
   }
 
   return (

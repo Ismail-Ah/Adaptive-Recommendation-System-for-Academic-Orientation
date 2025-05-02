@@ -40,4 +40,5 @@ public class User {
     // Relationships to CareerAspiration nodes
     @Relationship(type = "ASPIRES_TO", direction = Relationship.Direction.OUTGOING)
     private Set<CareerAspiration> careerAspirations;
+
 }

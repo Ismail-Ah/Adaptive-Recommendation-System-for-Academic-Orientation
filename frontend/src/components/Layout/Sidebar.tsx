@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+
 import { Home, PlusCircle, UploadCloud, BarChart, LogOut, GraduationCap } from 'lucide-react';
+
 import { useAuth } from '../../contexts/AuthContext'; // Adjust if needed
 
 export const AdminSidebar: React.FC = () => {
@@ -52,6 +54,7 @@ export const AdminSidebar: React.FC = () => {
         </Link>
 
         <Link
+
           to="/DiplomaForm"
           className={`${isActive('/DiplomaForm')} flex flex-col items-center p-2 rounded-lg transition-colors duration-200`}
           title="Add Diploma"
@@ -94,3 +97,4 @@ export const AdminSidebar: React.FC = () => {
     </div>
   );
 };
+

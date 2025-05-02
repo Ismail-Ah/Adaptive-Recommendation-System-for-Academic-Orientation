@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { BarChart, PlusCircle, UploadCloud, List, GraduationCap, MapPin, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +18,7 @@ interface Diploma {
   matieresDiplome: string[];
   matieresEtudiant: string[];
 }
+
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -63,6 +65,7 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -85,6 +88,7 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500">Total Diplomas</p>
               <p className="text-2xl font-bold text-gray-900">{totalDiplomas}</p>
+
             </div>
           </div>
         </div>
@@ -97,6 +101,7 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500">Schools</p>
               <p className="text-2xl font-bold text-gray-900">{totalSchools}</p>
+
             </div>
           </div>
         </div>
@@ -109,6 +114,7 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500">Cities</p>
               <p className="text-2xl font-bold text-gray-900">{totalCities}</p>
+
             </div>
           </div>
         </div>
@@ -121,6 +127,7 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-500">Avg. Duration</p>
               <p className="text-2xl font-bold text-gray-900">{averageDuration} years</p>
+
             </div>
           </div>
         </div>
@@ -162,6 +169,7 @@ export const AdminDashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
+
         </div>
       </div>
     </div>

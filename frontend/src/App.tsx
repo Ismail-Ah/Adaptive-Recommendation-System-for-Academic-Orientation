@@ -14,7 +14,11 @@ import { AdminLayout } from './components/Layout/AdminLayout';
 import { CSVUpload } from './components/Admin/CSVUpload';
 import { DiplomaForm } from './components/Admin/DiplomaForm'; // ✅ Import DiplomaForm page
 import { DiplomaStatistics } from './components/Admin/DiplomaStatistics';
+
 import AdminDiplomas from './pages/AdminDiplomas';
+
+import { ThemeProvider } from './contexts/ThemeContext';
+
 
 
 
@@ -55,12 +59,15 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+
   return (
-    <Router>
+    <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-50">
-          {/* Fixed Navbar */}
-          <Navbar className="fixed top-0 left-0 right-0 z-50" />
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            {/* Fixed Navbar */}
+            <Navbar className="fixed top-0 left-0 right-0 z-50" />
+
 
           {/* Main content with padding to account for the fixed Navbar */}
           <div className="pt-16">
@@ -99,11 +106,12 @@ function App() {
             </Route>
           </Routes>
 
+
           </div>
-        </div>
+        </Router>
       </AuthProvider>
-    </Router>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;
