@@ -13,4 +13,12 @@ public class Duration {
     private Long id;
 
     private Integer years; // Example: 3, 4, 5 years
+
+    public Integer getValue() {
+        return years;
+    }
+
+    public void setValue(Integer value) {
+        this.years = value;
+    }
 }

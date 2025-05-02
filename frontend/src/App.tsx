@@ -14,6 +14,7 @@ import { AdminLayout } from './components/Layout/AdminLayout';
 import { CSVUpload } from './components/Admin/CSVUpload';
 import { DiplomaForm } from './components/Admin/DiplomaForm'; // ✅ Import DiplomaForm page
 import { DiplomaStatistics } from './components/Admin/DiplomaStatistics';
+import AdminDiplomas from './pages/AdminDiplomas';
 
 
 
@@ -94,7 +95,7 @@ function App() {
               <Route path="/csv-upload" element={<CSVUpload />} />
               <Route path="/DiplomaForm" element={<DiplomaForm />} />
               <Route path="/DiplomaStatistics" element={<DiplomaStatistics />} />
-
+              <Route path="/admin-diplomas" element={<AdminDiplomas />} />
             </Route>
           </Routes>
 

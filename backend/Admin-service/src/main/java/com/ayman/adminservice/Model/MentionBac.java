@@ -6,8 +6,16 @@ import org.springframework.data.neo4j.core.schema.Node;
 import lombok.Data;
 
 @Data
-@Node("Mention")
+@Node("MentionBac")
 public class MentionBac {
     @Id
-    private String mention;
+    private String name;
+
+    public String getMention() {
+        return name;
+    }
+
+    public void setMention(String mention) {
+        this.name = mention;
+    }
 }

@@ -1,21 +1,20 @@
 package com.ayman.adminservice.Model;
 
+import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
-import lombok.Data;
-
 @Data
-@Node("Career")
-public class Career {
+@Node("AncienneDiplome")
+public class PreviousDiploma {
     @Id
     private String name;
 
-    public String getCareer() {
+    public String getAncienneDiplome() {
         return name;
     }
 
-    public void setCareer(String career) {
+    public void setAncienneDiplome(String career) {
         this.name = career;
     }
 }

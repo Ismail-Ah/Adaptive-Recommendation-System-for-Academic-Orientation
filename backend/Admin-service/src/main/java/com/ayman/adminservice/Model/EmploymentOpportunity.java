@@ -9,5 +9,13 @@ import lombok.Data;
 @Node("EmploymentOpportunity")
 public class EmploymentOpportunity{
     @Id
-    private String oppotunity;
+    private String name;
+
+    public String getOppotunity() {
+        return name;
+    }
+
+    public void setOppotunity(String oppotunity) {
+        this.name = oppotunity;
+    }
 }

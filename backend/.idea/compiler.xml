@@ -9,7 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="ApiGateway" />
       </profile>
-      <profile name="Annotation profile for demo" enabled="true">
+      <profile name="Annotation profile for Admin-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -19,11 +19,13 @@
         <module name="demo (2)" />
         <module name="demo" />
         <module name="demo (1)" />
+        <module name="Admin-service" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Admin-service" options="-parameters" />
       <module name="ApiGateway" options="-parameters" />
       <module name="demo" options="-parameters" />
       <module name="demo (1)" options="-parameters" />
