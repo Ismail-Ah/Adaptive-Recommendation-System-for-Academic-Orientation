@@ -1,5 +1,6 @@
 
 export interface User {
+  id: string;
   email: string;
   name: string;
   year: string;
@@ -9,6 +10,7 @@ export interface User {
   careerAspirations:string[];
   duree:number;
   montionBac:string;
+  role: string; // ✅ ADD role here
 }
 
 export interface AuthState {
@@ -20,10 +22,11 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  login: (studentId: string, password: string) => Promise<void>;
+  login: (studentId: string, password: string, isAdmin:string) => Promise<User>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile : (data: any) => Promise<void>;
+  isAdmin: () => boolean;
 }
 
 export interface RegisterData {
@@ -59,7 +62,7 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  login: (studentId: string, password: string) => Promise<void>;
+  login: (studentId: string, password: string, isAdmin:string) => Promise<User>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
 }

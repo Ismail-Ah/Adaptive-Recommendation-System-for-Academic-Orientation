@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, Save, UserCircle, BookOpen, Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext'; // Adjust path to your AuthContext
+import { useTheme } from '../contexts/ThemeContext';
 
 // Define types for User and form data
 
@@ -39,6 +40,7 @@ const availableBacMentions = ['Passable', 'Assez Bien', 'Bien', 'Très Bien'] as
 
 const Profile: React.FC = () => {
   const { user, updateProfile } = useAuth();
+  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     name: '',
@@ -104,8 +106,8 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 bg-gray-50 min-h-screen">
-      <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100">
+    <div className={`max-w-4xl mx-auto px-4 py-12 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen`}>
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-2xl rounded-2xl overflow-hidden ${isDarkMode ? 'border-gray-700' : 'border-gray-100'} border`}>
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-white">
           <div className="flex items-center space-x-4">
@@ -125,7 +127,7 @@ const Profile: React.FC = () => {
             {/* Basic Info */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="email" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Email
                 </label>
                 <input
@@ -133,13 +135,13 @@ const Profile: React.FC = () => {
                   id="email"
                   value={formData.email}
                   disabled
-                  className="block w-full rounded-xl border-gray-200 bg-gray-100 px-4 py-3 text-gray-500 shadow-sm focus:ring-0"
+                  className={`block w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-gray-100 border-gray-200 text-gray-500'} px-4 py-3 shadow-sm focus:ring-0`}
                   aria-disabled="true"
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="name" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Nom Complet
                 </label>
                 <input
@@ -149,125 +151,118 @@ const Profile: React.FC = () => {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200"
+                  className={`block w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200`}
                   placeholder="Entrez votre nom complet"
                 />
               </div>
-
-              
             </div>
 
-            
-            
+            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-6 rounded-xl ${isDarkMode ? 'border-gray-600' : 'border-gray-100'} border shadow-sm`}>
+              <div className="flex items-center gap-3 mb-6">
+                <BookOpen className={`h-6 w-6 ${isDarkMode ? 'text-blue-400' : 'text-indigo-600'}`} />
+                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>Information du bac</h3>
+              </div>
 
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-  <div className="flex items-center gap-3 mb-6">
-    <BookOpen className="h-6 w-6 text-indigo-600" />
-    <h3 className="text-xl font-semibold text-gray-900">Information du bac</h3>
-  </div>
+              <div className="space-y-4">
+                <div className="flex gap-6">
+                  {/* Année Académique */}
+                  <div className="w-1/3">
+                    <label htmlFor="year" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Année Académique
+                    </label>
+                    <select
+                      id="year"
+                      value={formData.year}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setFormData({ ...formData, year: e.target.value })
+                      }
+                      className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all`}
+                    >
+                      <option value="">Sélectionnez une année</option>
+                      <option value="1ère Bac">1ère Bac</option>
+                      <option value="2ème Bac">2ème Bac</option>
+                    </select>
+                  </div>
 
-  <div className="space-y-4">
-    {/* Single row with three inputs */}
-    <div className="flex gap-6">
-      {/* Année Académique */}
-      <div className="w-1/3">
-        <label htmlFor="year" className="block text-sm font-medium text-gray-700">
-          Année Académique
-        </label>
-        <select
-          id="year"
-          value={formData.year}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData({ ...formData, year: e.target.value })
-          }
-          className="w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all"
-        >
-          <option value="">Sélectionnez une année</option>
-          <option value="1ère Bac">1ère Bac</option>
-          <option value="2ème Bac">2ème Bac</option>
-        </select>
-      </div>
+                  {/* Filière */}
+                  <div className="w-1/3">
+                    <label htmlFor="filiere" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Filière
+                    </label>
+                    <select
+                      id="filiere"
+                      value={formData.filiere}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setFormData({ ...formData, filiere: e.target.value })
+                      }
+                      disabled={!formData.year}
+                      className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm transition-all focus:ring-indigo-500 focus:border-indigo-500 ${
+                        !formData.year ? (isDarkMode ? "bg-gray-800 cursor-not-allowed" : "bg-gray-200 cursor-not-allowed") : ""
+                      }`}
+                    >
+                      <option value="">Sélectionnez une filière</option>
+                      {availableFilieres.map((filiere) => (
+                        <option key={filiere} value={filiere}>
+                          {filiere}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-      {/* Filière */}
-      <div className="w-1/3">
-        <label htmlFor="filiere" className="block text-sm font-medium text-gray-700">
-          Filière
-        </label>
-        <select
-          id="filiere"
-          value={formData.filiere}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData({ ...formData, filiere: e.target.value })
-          }
-          disabled={!formData.year} // Disable if Année Académique is not selected
-          className={`w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm transition-all focus:ring-indigo-500 focus:border-indigo-500 ${
-            !formData.year ? "bg-gray-200 cursor-not-allowed" : ""
-          }`}
-        >
-          <option value="">Sélectionnez une filière</option>
-          {availableFilieres.map((filiere) => (
-            <option key={filiere} value={filiere}>
-              {filiere}
-            </option>
-          ))}
-        </select>
-      </div>
+                  {/* Mention Bac */}
+                  <div className="w-1/3">
+                    <label htmlFor="montionBac" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Mention Bac
+                    </label>
+                    <select
+                      id="montionBac"
+                      value={formData.montionBac}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        setFormData({ ...formData, montionBac: e.target.value })
+                      }
+                      disabled={!formData.year || formData.year !== "2ème Bac"}
+                      className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm transition-all focus:ring-indigo-500 focus:border-indigo-500 ${
+                        !formData.year || formData.year !== "2ème Bac" ? (isDarkMode ? "bg-gray-800 cursor-not-allowed" : "bg-gray-200 cursor-not-allowed") : ""
+                      }`}
+                    >
+                      <option value="">Sélectionnez une mention</option>
+                      {availableBacMentions.map((montionBac) => (
+                        <option key={montionBac} value={montionBac}>
+                          {montionBac}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      {/* Mention Bac */}
-      <div className="w-1/3">
-        <label htmlFor="montionBac" className="block text-sm font-medium text-gray-700">
-          Mention Bac
-        </label>
-        <select
-          id="montionBac"
-          value={formData.montionBac}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData({ ...formData, montionBac: e.target.value })
-          }
-          disabled={!formData.year || formData.year !== "2ème Bac"} // Disable if Année Académique is not selected or not "2ème Bac"
-          className={`w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm transition-all focus:ring-indigo-500 focus:border-indigo-500 ${
-            !formData.year || formData.year !== "2ème Bac" ? "bg-gray-200 cursor-not-allowed" : ""
-          }`}
-        >
-          <option value="">Sélectionnez une mention</option>
-          {availableBacMentions.map((montionBac) => (
-            <option key={montionBac} value={montionBac}>
-              {montionBac}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div className="">
-        <label htmlFor="duree" className="block text-sm font-medium text-gray-700">
-          Durée d’Étude Voulue Post-Bac (années)
-        </label>
-        <select
-          id="duree"
-          value={formData.duree}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData({ ...formData, duree: Number(e.target.value) }) // Convert to number
-          }
-          className="w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all"
-        >
-          <option value="">Sélectionnez une durée</option>
-          {availableStudyDurations.map((duree) => (
-            <option key={duree} value={duree}>
-              {duree} ans
-            </option>
-          ))}
-        </select>
-      </div>
-
+            <div className="space-y-2">
+              <label htmlFor="duree" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Durée d'Étude Voulue Post-Bac (années)
+              </label>
+              <select
+                id="duree"
+                value={formData.duree}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                  setFormData({ ...formData, duree: Number(e.target.value) })
+                }
+                className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all`}
+              >
+                <option value="">Sélectionnez une durée</option>
+                {availableStudyDurations.map((duree) => (
+                  <option key={duree} value={duree}>
+                    {duree} ans
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Subjects Section */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-6 rounded-xl ${isDarkMode ? 'border-gray-600' : 'border-gray-100'} border shadow-sm`}>
               <div className="flex items-center gap-3 mb-6">
-                <BookOpen className="h-6 w-6 text-indigo-600" />
-                <h3 className="text-xl font-semibold text-gray-900">Matières</h3>
+                <BookOpen className={`h-6 w-6 ${isDarkMode ? 'text-blue-400' : 'text-indigo-600'}`} />
+                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>Matières</h3>
               </div>
               <div className="space-y-4">
                 {formData.subjects.map((subject, index) => (
@@ -277,7 +272,7 @@ const Profile: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleItemChange('subjects', index, e.target.value)
                       }
-                      className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200"
+                      className={`block w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200`}
                     >
                       <option value="">Sélectionnez une matière</option>
                       {availableSubjects.map((opt) => (
@@ -289,7 +284,7 @@ const Profile: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveItem('subjects', index)}
-                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duree-200"
+                      className={`p-2 ${isDarkMode ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600' : 'text-gray-500 hover:text-red-600 hover:bg-red-50'} rounded-full transition-all duree-200`}
                       aria-label="Supprimer cette matière"
                     >
                       <Trash2 className="h-5 w-5" />
@@ -299,7 +294,7 @@ const Profile: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddItem('subjects')}
-                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-indigo-300 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all duree-200"
+                  className={`w-full flex items-center justify-center py-3 px-4 border border-dashed ${isDarkMode ? 'border-blue-400 text-blue-400 hover:bg-gray-600 hover:border-blue-300' : 'border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400'} rounded-xl transition-all duree-200`}
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
                   Ajouter une Matière
@@ -308,10 +303,10 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Career Aspirations Section */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-6 rounded-xl ${isDarkMode ? 'border-gray-600' : 'border-gray-100'} border shadow-sm`}>
               <div className="flex items-center gap-3 mb-6">
-                <BookOpen className="h-6 w-6 text-indigo-600" />
-                <h3 className="text-xl font-semibold text-gray-900">Aspirations Professionnelles</h3>
+                <BookOpen className={`h-6 w-6 ${isDarkMode ? 'text-blue-400' : 'text-indigo-600'}`} />
+                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>Aspirations Professionnelles</h3>
               </div>
               <div className="space-y-4">
                 {formData.careerAspirations.map((aspiration, index) => (
@@ -321,7 +316,7 @@ const Profile: React.FC = () => {
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         handleItemChange('careerAspirations', index, e.target.value)
                       }
-                      className="block w-full rounded-xl border-gray-200 px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200"
+                      className={`block w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200`}
                     >
                       <option value="">Sélectionnez une aspiration</option>
                       {availableCareerAspirations.map((opt) => (
@@ -333,7 +328,7 @@ const Profile: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleRemoveItem('careerAspirations', index)}
-                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duree-200"
+                      className={`p-2 ${isDarkMode ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600' : 'text-gray-500 hover:text-red-600 hover:bg-red-50'} rounded-full transition-all duree-200`}
                       aria-label="Supprimer cette aspiration"
                     >
                       <Trash2 className="h-5 w-5" />
@@ -343,7 +338,7 @@ const Profile: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddItem('careerAspirations')}
-                  className="w-full flex items-center justify-center py-3 px-4 border border-dashed border-indigo-300 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all duree-200"
+                  className={`w-full flex items-center justify-center py-3 px-4 border border-dashed ${isDarkMode ? 'border-blue-400 text-blue-400 hover:bg-gray-600 hover:border-blue-300' : 'border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400'} rounded-xl transition-all duree-200`}
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
                   Ajouter une Aspiration

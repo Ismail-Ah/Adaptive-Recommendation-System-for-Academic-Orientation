@@ -9,24 +9,14 @@ import { LogIn } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const schemaConnexion = z.object({
-  identifiantEtudiant: z.string()
-  /*
-    .min(1, 'L\'identifiant étudiant est requis')
-    .regex(/^[A-Z0-9]+$/, 'L\'identifiant étudiant doit contenir uniquement des lettres majuscules et des chiffres'),
-    */,
-  motDePasse: z.string()
-    .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
-    /*
-    .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une lettre majuscule')
-    .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une lettre minuscule')
-    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
-    .regex(/[^A-Za-z0-9]/, 'Le mot de passe doit contenir au moins un caractère spécial'),
-    */
+  identifiantEtudiant: z.string(),
+  motDePasse: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
+  role: z.enum(['ETUDIANT', 'ADMIN']).default('ETUDIANT'),
 });
 
 type FormulaireConnexion = z.infer<typeof schemaConnexion>;
 
-function Connexion() {
+function Login() {
   const navigate = useNavigate();
   const { login, error: erreurAuth } = useAuth();
   
@@ -41,8 +31,15 @@ function Connexion() {
 
   const onSubmit = async (data: FormulaireConnexion) => {
     try {
-      await login(data.identifiantEtudiant, data.motDePasse);
-      navigate('/profile');
+      const user = await login(data.identifiantEtudiant, data.motDePasse , data.role);
+      
+
+      if (user.role === 'ADMIN') {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/profile');
+      }
+      
     } catch (error) {
       setError('root', {
         type: 'manual',
@@ -50,6 +47,7 @@ function Connexion() {
       });
     }
   };
+  
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
@@ -60,7 +58,7 @@ function Connexion() {
             <h2 className="text-2xl font-bold text-gray-900">Bienvenue</h2>
             <p className="text-gray-600 mt-2">Connectez-vous à votre compte</p>
           </div>
-          
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {(errors.root || erreurAuth) && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
@@ -96,11 +94,7 @@ function Connexion() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <span className="flex items-center justify-center">
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -129,4 +123,4 @@ function Connexion() {
   );
 }
 
-export default Connexion;
+export default Login;
