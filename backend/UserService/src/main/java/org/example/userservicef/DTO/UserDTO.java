@@ -9,7 +9,6 @@ public class UserDTO {
     private String email;
     private String name;
     private String password;
-    private String Role;
     private String year; 
     private String filiere;
     private Set<String> subjects;
