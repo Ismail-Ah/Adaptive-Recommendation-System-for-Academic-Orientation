@@ -1,37 +1,44 @@
 package org.example.userservicef.Model;
 
-import lombok.Data;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
+import lombok.Data;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Set; // Use Set instead of List to avoid duplicates
 
+@Node("User") // Consider renaming to "Student" to align with your context
 @Data
-@Node("User")
 public class User {
     @Id
-    private String email;
+    private String email; // Unique identifier
+
     private String name;
-    private String role;
-    private String password;
+    private String password; // Consider hashing this (e.g., with BCrypt)
+    private String year;
 
-    @Relationship(type = "ENROLLED_IN_YEAR")
-    private Year year; // Relationship to Year node
+    // Relationships to Interest nodes
+    @Relationship(type = "INTERESTED_IN", direction = Relationship.Direction.OUTGOING)
+    private Set<Interest> interests;
 
-    @Relationship(type = "STUDIES_FILIERE")
-    private Filiere filiere; // Relationship to Filiere node
+    // Relationships to Interest nodes
+    @Relationship(type = "STUDIES_FILIERE", direction = Relationship.Direction.OUTGOING)
+    private Filiere filiere;
 
-    @Relationship(type = "INTERESTED_IN")
-    private Duree duree;
-
-    @Relationship(type = "OBTAINED_MENTION")
+    // Relationships to Interest nodes
+    @Relationship(type = "OBTAINED_MENTION", direction = Relationship.Direction.OUTGOING)
     private MontionBac montionBac;
 
-    @Relationship(type = "STUDIES")
-    private Set<Subject> subjects = new HashSet<>();
+    // Relationships to Interest nodes
+    @Relationship(type = "INTERSTED_IN", direction = Relationship.Direction.OUTGOING)
+    private Duree duree;
 
-    @Relationship(type = "ASPIRES_TO")
-    private Set<CareerAspiration> careerAspirations = new HashSet<>();
+    // Relationships to Subject nodes
+    @Relationship(type = "STUDIES", direction = Relationship.Direction.OUTGOING)
+    private Set<Subject> subjects;
+
+    // Relationships to CareerAspiration nodes
+    @Relationship(type = "ASPIRES_TO", direction = Relationship.Direction.OUTGOING)
+    private Set<CareerAspiration> careerAspirations;
+
 }

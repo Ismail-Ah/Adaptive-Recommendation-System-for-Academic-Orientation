@@ -1,28 +1,46 @@
 import React, { useState } from 'react';
-import { Diploma, MentionBacOption } from '../../types/index';
-import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { MentionBacOption } from '../../types/index';
 import { X } from 'lucide-react';
 
 interface DiplomaFormProps {
   onSuccess?: () => void;
 }
 
-export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
-  const [formSubmitted, setFormSubmitted] = useState(false);
-  const [diplomas, setDiplomas] = useState<Diploma[]>([]); // local diplomas array
+interface FormData {
+  nomDiplome: string;
+  ecole: string;
+  career: string[];
+  employmentOpportunities: string[];
+  ancienneDiplome: string[];
+  filiere: string[];
+  duree: number;
+  mentionBac: string;
+  ville: string;
+  matieresDiplome: string[];
+  matieresEtudiant: string[];
+}
 
-  const [formData, setFormData] = useState<Omit<Diploma, 'id'>>({
-    nom_Diplome: '',
+export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
+  const { isAdmin, token } = useAuth();
+  const navigate = useNavigate();
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState<FormData>({
+    nomDiplome: '',
     ecole: '',
     career: [],
-    employement_Opportunities: [],
-    ancienne_Diplome: '',
-    filiere: '',
+    employmentOpportunities: [],
+    ancienneDiplome: [],
+    filiere: [],
     duree: 0,
-    mention_Bac: '',
+    mentionBac: '',
     ville: '',
-    matieres_Diplome: [],
-    matieres_Etudiant: [],
+    matieresDiplome: [],
+    matieresEtudiant: [],
   });
 
   // Form states for adding items
@@ -30,6 +48,13 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
   const [opportunityInput, setOpportunityInput] = useState('');
   const [matiereDiplomeInput, setMatiereDiplomeInput] = useState('');
   const [matiereEtudiantInput, setMatiereEtudiantInput] = useState('');
+  const [filiereInput, setFiliereInput] = useState('');
+  const [ancienneDiplomeInput, setAncienneDiplomeInput] = useState('');
+
+  if (!isAdmin()) {
+    navigate('/');
+    return null;
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -40,7 +65,7 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
     }
   };
 
-  const handleAddItem = (field: keyof typeof formData, value: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
+  const handleAddItem = (field: keyof FormData, value: string, setter: React.Dispatch<React.SetStateAction<string>>) => {
     if (!value.trim()) return;
     if (Array.isArray(formData[field])) {
       setFormData({
@@ -51,7 +76,7 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
     }
   };
 
-  const handleRemoveItem = (field: keyof typeof formData, index: number) => {
+  const handleRemoveItem = (field: keyof FormData, index: number) => {
     if (Array.isArray(formData[field])) {
       const newArray = [...(formData[field] as string[])];
       newArray.splice(index, 1);
@@ -59,36 +84,68 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newDiploma: Diploma = {
-      id: uuidv4(),
-      ...formData
+    // Prepare payload to match DiplomaUpdateDTO
+    const payload = {
+      nomDiplome: formData.nomDiplome,
+      ecole: formData.ecole,
+      career: formData.career,
+      employmentOpportunities: formData.employmentOpportunities,
+      ancienneDiplome: formData.ancienneDiplome,
+      filiere: formData.filiere,
+      duree: formData.duree,
+      mentionBac: formData.mentionBac,
+      ville: formData.ville,
+      matieresDiplome: formData.matieresDiplome,
+      matieresEtudiant: formData.matieresEtudiant
     };
 
-    // Locally add the diploma
-    setDiplomas((prev) => [...prev, newDiploma]);
+    try {
+      await axios.post('http://localhost:8080/api/diplomas/create', payload, {
+        headers: {
+          Authorization: Bearer ${token},
+          'Content-Type': 'application/json'
+        }
+      });
 
-    setFormSubmitted(true);
+      setFormSubmitted(true);
+      setError(null);
 
-    // Reset form
-    setFormData({
-      nom_Diplome: '',
-      ecole: '',
-      career: [],
-      employement_Opportunities: [],
-      ancienne_Diplome: '',
-      filiere: '',
-      duree: 0,
-      mention_Bac: '',
-      ville: '',
-      matieres_Diplome: [],
-      matieres_Etudiant: [],
-    });
+      // Reset form
+      setFormData({
+        nomDiplome: '',
+        ecole: '',
+        career: [],
+        employmentOpportunities: [],
+        ancienneDiplome: [],
+        filiere: [],
+        duree: 0,
+        mentionBac: '',
+        ville: '',
+        matieresDiplome: [],
+        matieresEtudiant: [],
+      });
+      setCareerInput('');
+      setOpportunityInput('');
+      setMatiereDiplomeInput('');
+      setMatiereEtudiantInput('');
+      setFiliereInput('');
+      setAncienneDiplomeInput('');
 
-    if (onSuccess) {
-      onSuccess();
+      if (onSuccess) {
+        onSuccess();
+      }
+
+      // Navigate back to AdminDiplomas after a short delay to show success message
+      setTimeout(() => {
+        navigate('/AdminDiplomas');
+      }, 1500);
+
+    } catch (err) {
+      setError('Failed to create diploma');
+      setFormSubmitted(false);
     }
   };
 
@@ -110,19 +167,31 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
         </div>
       )}
 
-<form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-400 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                {error}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Information */}
           <div>
-            <label htmlFor="nom_Diplome" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="nomDiplome" className="block text-sm font-medium text-gray-700">
               Nom Diplôme *
             </label>
             <input
               type="text"
-              id="nom_Diplome"
-              name="nom_Diplome"
+              id="nomDiplome"
+              name="nomDiplome"
               required
-              value={formData.nom_Diplome}
+              value={formData.nomDiplome}
               onChange={handleInputChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
@@ -138,21 +207,6 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
               name="ecole"
               required
               value={formData.ecole}
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="filiere" className="block text-sm font-medium text-gray-700">
-              Filière *
-            </label>
-            <input
-              type="text"
-              id="filiere"
-              name="filiere"
-              required
-              value={formData.filiere}
               onChange={handleInputChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
@@ -190,13 +244,13 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
           </div>
           
           <div>
-            <label htmlFor="mention_Bac" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="mentionBac" className="block text-sm font-medium text-gray-700">
               Mention Bac
             </label>
             <select
-              id="mention_Bac"
-              name="mention_Bac"
-              value={formData.mention_Bac}
+              id="mentionBac"
+              name="mentionBac"
+              value={formData.mentionBac}
               onChange={handleInputChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
@@ -208,24 +262,49 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
               ))}
             </select>
           </div>
-          
-          <div>
-            <label htmlFor="ancienne_Diplome" className="block text-sm font-medium text-gray-700">
-              Ancienne Diplôme
-            </label>
-            <input
-              type="text"
-              id="ancienne_Diplome"
-              name="ancienne_Diplome"
-              value={formData.ancienne_Diplome}
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-          </div>
         </div>
         
         {/* Array inputs */}
         <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filière *
+            </label>
+            <div className="flex">
+              <input
+                type="text"
+                value={filiereInput}
+                onChange={(e) => setFiliereInput(e.target.value)}
+                className="block w-full border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="Add a filière"
+              />
+              <button
+                type="button"
+                onClick={() => handleAddItem('filiere', filiereInput, setFiliereInput)}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-r-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Add
+              </button>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {formData.filiere.map((item, index) => (
+                <div key={index} className="inline-flex items-center bg-blue-100 rounded-full px-3 py-1 text-sm text-blue-800">
+                  {item}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem('filiere', index)}
+                    className="ml-1 text-blue-500 hover:text-blue-700 focus:outline-none"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            {formData.filiere.length === 0 && (
+              <p className="mt-1 text-xs text-red-500">Please add at least one filière</p>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Career Paths *
@@ -279,19 +358,19 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
               />
               <button
                 type="button"
-                onClick={() => handleAddItem('employement_Opportunities', opportunityInput, setOpportunityInput)}
+                onClick={() => handleAddItem('employmentOpportunities', opportunityInput, setOpportunityInput)}
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-r-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Add
               </button>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              {formData.employement_Opportunities.map((item, index) => (
+              {formData.employmentOpportunities.map((item, index) => (
                 <div key={index} className="inline-flex items-center bg-green-100 rounded-full px-3 py-1 text-sm text-green-800">
                   {item}
                   <button
                     type="button"
-                    onClick={() => handleRemoveItem('employement_Opportunities', index)}
+                    onClick={() => handleRemoveItem('employmentOpportunities', index)}
                     className="ml-1 text-green-500 hover:text-green-700 focus:outline-none"
                   >
                     <X size={14} />
@@ -299,7 +378,7 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
                 </div>
               ))}
             </div>
-            {formData.employement_Opportunities.length === 0 && (
+            {formData.employmentOpportunities.length === 0 && (
               <p className="mt-1 text-xs text-red-500">Please add at least one employment opportunity</p>
             )}
           </div>
@@ -318,19 +397,19 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
               />
               <button
                 type="button"
-                onClick={() => handleAddItem('matieres_Diplome', matiereDiplomeInput, setMatiereDiplomeInput)}
+                onClick={() => handleAddItem('matieresDiplome', matiereDiplomeInput, setMatiereDiplomeInput)}
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-r-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Add
               </button>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              {formData.matieres_Diplome.map((item, index) => (
+              {formData.matieresDiplome.map((item, index) => (
                 <div key={index} className="inline-flex items-center bg-amber-100 rounded-full px-3 py-1 text-sm text-amber-800">
                   {item}
                   <button
                     type="button"
-                    onClick={() => handleRemoveItem('matieres_Diplome', index)}
+                    onClick={() => handleRemoveItem('matieresDiplome', index)}
                     className="ml-1 text-amber-500 hover:text-amber-700 focus:outline-none"
                   >
                     <X size={14} />
@@ -338,7 +417,7 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
                 </div>
               ))}
             </div>
-            {formData.matieres_Diplome.length === 0 && (
+            {formData.matieresDiplome.length === 0 && (
               <p className="mt-1 text-xs text-red-500">Please add at least one subject</p>
             )}
           </div>
@@ -357,19 +436,19 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
               />
               <button
                 type="button"
-                onClick={() => handleAddItem('matieres_Etudiant', matiereEtudiantInput, setMatiereEtudiantInput)}
+                onClick={() => handleAddItem('matieresEtudiant', matiereEtudiantInput, setMatiereEtudiantInput)}
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-r-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Add
               </button>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              {formData.matieres_Etudiant.map((item, index) => (
+              {formData.matieresEtudiant.map((item, index) => (
                 <div key={index} className="inline-flex items-center bg-purple-100 rounded-full px-3 py-1 text-sm text-purple-800">
                   {item}
                   <button
                     type="button"
-                    onClick={() => handleRemoveItem('matieres_Etudiant', index)}
+                    onClick={() => handleRemoveItem('matieresEtudiant', index)}
                     className="ml-1 text-purple-500 hover:text-purple-700 focus:outline-none"
                   >
                     <X size={14} />
@@ -377,25 +456,68 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
                 </div>
               ))}
             </div>
-            {formData.matieres_Etudiant.length === 0 && (
+            {formData.matieresEtudiant.length === 0 && (
               <p className="mt-1 text-xs text-red-500">Please add at least one student subject</p>
             )}
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Ancienne Diplôme
+            </label>
+            <div className="flex">
+              <input
+                type="text"
+                value={ancienneDiplomeInput}
+                onChange={(e) => setAncienneDiplomeInput(e.target.value)}
+                className="block w-full border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="Add a previous diploma"
+              />
+              <button
+                type="button"
+                onClick={() => handleAddItem('ancienneDiplome', ancienneDiplomeInput, setAncienneDiplomeInput)}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-r-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Add
+              </button>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {formData.ancienneDiplome.map((item, index) => (
+                <div key={index} className="inline-flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-800">
+                  {item}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem('ancienneDiplome', index)}
+                    className="ml-1 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
         
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={() => navigate('/admin-diplomas')}
+            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Cancel
+          </button>
           <button
             type="submit"
             disabled={
-              !formData.nom_Diplome || 
+              !formData.nomDiplome || 
               !formData.ecole || 
-              !formData.filiere || 
+              formData.filiere.length === 0 || 
               !formData.ville || 
               formData.duree <= 0 || 
               formData.career.length === 0 || 
-              formData.employement_Opportunities.length === 0 || 
-              formData.matieres_Diplome.length === 0 || 
-              formData.matieres_Etudiant.length === 0
+              formData.employmentOpportunities.length === 0 || 
+              formData.matieresDiplome.length === 0 || 
+              formData.matieresEtudiant.length === 0
             }
             className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >

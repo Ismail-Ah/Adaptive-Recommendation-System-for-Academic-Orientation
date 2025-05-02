@@ -80,16 +80,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = useCallback(async (studentId: string, password: string): Promise<User> => {
+
+  const login = useCallback(async (studentId: string, password: string, isAdmin: string): Promise<User> => {
+
     try {
       dispatch({ type: 'AUTH_START' });
+      console.log('Attempting login with:', { email: studentId, password, role: isAdmin });
+      
       const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: studentId, password }),
+        body: JSON.stringify({ email: studentId, password, role: isAdmin }),
       });
-      if (!response.ok) throw new Error('Invalid credentials');
-      const data = await response.json();
+
+      console.log('Login response status:', response.status);
+      const responseText = await response.text();
+      console.log('Login response text:', responseText);
+      
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+      
+      const data = JSON.parse(responseText);
+      console.log('Parsed login data:', data);
+
   
       const user: User = {
         id: data.id,
@@ -99,17 +113,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         montionBac: data.montionBac,
         duree: data.duree,
         year: data.year,
-        interests: data.interests,
-        subjects: data.subjects,
-        careerAspirations: data.careerAspirations,
+
+        interests: data.interests || [],
+        subjects: data.subjects || [],
+        careerAspirations: data.careerAspirations || [],
+
         role: data.role,
       };
   
       localStorage.setItem('token', data.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: data.token } });
   
-      return user; // ✅ important
+
+      return user;
+
     } catch (error) {
+      console.error('Login error:', error);
       localStorage.removeItem('token');
       dispatch({ type: 'AUTH_FAILURE', payload: 'Invalid credentials' });
       throw error;
@@ -189,7 +208,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const isAdmin = useCallback(() => {
-    return state.user?.role === 'admin';
+    console.log('isAdmin check - User role:', state.user?.role);
+    return state.user?.role?.toUpperCase() === 'ADMIN';
+
   }, [state.user]);
 
   return (

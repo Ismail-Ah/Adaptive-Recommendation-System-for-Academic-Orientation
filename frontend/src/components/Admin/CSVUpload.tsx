@@ -1,9 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
 import { Upload, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { Diploma } from '../../types/index'; // keep your type import
+import { Diploma } from '../../types/index';
 
 export const CSVUpload: React.FC = () => {
+  const { token } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -25,11 +28,11 @@ export const CSVUpload: React.FC = () => {
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.type === 'text/csv') {
+      if (droppedFile.type === 'application/json') {
         setFile(droppedFile);
         setUploadResult({ success: false, message: '' });
       } else {
-        setUploadResult({ success: false, message: 'Please upload a CSV file.' });
+        setUploadResult({ success: false, message: 'Please upload a JSON file.' });
       }
     }
   };
@@ -37,11 +40,11 @@ export const CSVUpload: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.type === 'text/csv') {
+      if (selectedFile.type === 'application/json') {
         setFile(selectedFile);
         setUploadResult({ success: false, message: '' });
       } else {
-        setUploadResult({ success: false, message: 'Please upload a CSV file.' });
+        setUploadResult({ success: false, message: 'Please upload a JSON file.' });
       }
     }
   };
@@ -54,12 +57,36 @@ export const CSVUpload: React.FC = () => {
 
     try {
       const text = await file.text();
-      const result = parseCSV(text);
+      const result = parseJSON(text);
 
       if (result.success) {
+        const uploadPromises = result.diplomas.map(async (diploma) => {
+          // Prepare payload to match DiplomaUpdateDTO
+          const payload = {
+            nomDiplome: diploma.nom_Diplome,
+            ecole: diploma.ecole,
+            ville: diploma.ville,
+            duree: diploma.duree,
+            mentionBac: diploma.mention_Bac,
+            filiere: diploma.filiere,
+            career: diploma.career,
+            employmentOpportunities: diploma.employement_Opportunities,
+            ancienneDiplome: diploma.ancienne_Diplome,
+            matieresDiplome: diploma.matieres_Diplome,
+            matieresEtudiant: diploma.matieres_Etudiant
+          };
+          await axios.post('http://localhost:8080/api/diplomas/create', payload, {
+            headers: {
+              Authorization: Bearer ${token},
+              'Content-Type': 'application/json'
+            }
+          });
+        });
+
+        await Promise.all(uploadPromises);
         setUploadResult({
           success: true,
-          message: `Successfully parsed ${result.diplomas.length} diplomas!`,
+          message: Successfully uploaded ${result.diplomas.length} diplomas!,
           diplomas: result.diplomas
         });
         setFile(null);
@@ -68,118 +95,62 @@ export const CSVUpload: React.FC = () => {
         setUploadResult({ success: false, message: result.message });
       }
     } catch (error) {
-      setUploadResult({ success: false, message: 'Error parsing CSV file. Please check the format.' });
+      setUploadResult({ success: false, message: 'Error uploading diplomas. Please check the file or server connection.' });
     } finally {
       setIsUploading(false);
     }
   };
 
-  const parseCSV = (csvText: string): { success: boolean; message: string; diplomas: Diploma[] } => {
-    const lines = csvText.split('\n');
-    if (lines.length < 2) {
-      return { success: false, message: 'The CSV file is empty or badly formatted.', diplomas: [] };
-    }
+  const parseJSON = (jsonText: string): { success: boolean; message: string; diplomas: Diploma[] } => {
+    try {
+      const data = JSON.parse(jsonText);
+      const diplomas = Array.isArray(data) ? data : [data];
 
-    const headers = lines[0].split(',').map(h => h.trim());
-    const requiredFields = [
-      'nom_Diplome', 'ecole', 'career', 'employement_Opportunities',
-      'filiere', 'duree', 'ville', 'matieres_Diplome', 'matieres_Etudiant'
-    ];
+      const requiredFields = [
+        'nomDiplome', 'ecole', 'ville', 'duree', 'filiere', 'career',
+        'employmentOpportunities', 'matieresDiplome', 'matieresEtudiant'
+      ];
 
-    const missingFields = requiredFields.filter(field => !headers.includes(field));
-    if (missingFields.length > 0) {
-      return { success: false, message: `Missing headers: ${missingFields.join(', ')}`, diplomas: [] };
-    }
+      const errors: string[] = [];
+      const validDiplomas: Diploma[] = [];
 
-    const diplomas: Diploma[] = [];
-    const errors: string[] = [];
+      diplomas.forEach((diploma, index) => {
+        const missingFields = requiredFields.filter(field => {
+          const value = diploma[field];
+          if (field === 'duree') return typeof value !== 'number' || value <= 0;
+          if (['filiere', 'career', 'employmentOpportunities', 'matieresDiplome', 'matieresEtudiant'].includes(field))
+            return !Array.isArray(value) || value.length === 0;
+          return !value;
+        });
 
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-
-      const values = parseCSVLine(lines[i]);
-      if (values.length !== headers.length) {
-        errors.push(`Line ${i + 1}: Expected ${headers.length} columns, got ${values.length}`);
-        continue;
-      }
-
-      const diploma: Partial<Diploma> = { id: uuidv4() };
-
-      headers.forEach((header, index) => {
-        const value = values[index].trim();
-
-        switch (header) {
-          case 'nom_Diplome':
-          case 'ecole':
-          case 'ancienne_Diplome':
-          case 'filiere':
-          case 'ville':
-          case 'mention_Bac':
-            diploma[header as keyof Diploma] = value;
-            break;
-          case 'duree':
-            const dureeNum = parseInt(value);
-            if (isNaN(dureeNum) || dureeNum <= 0) {
-              errors.push(`Line ${i + 1}: Invalid duree "${value}".`);
-            } else {
-              diploma.duree = dureeNum;
-            }
-            break;
-          case 'career':
-          case 'employement_Opportunities':
-          case 'matieres_Diplome':
-          case 'matieres_Etudiant':
-            if (value.startsWith('[') && value.endsWith(']')) {
-              const arrayStr = value.slice(1, -1);
-              diploma[header as keyof Diploma] = arrayStr.split('|').map(v => v.trim());
-            } else {
-              diploma[header as keyof Diploma] = value ? [value] : [];
-            }
-            break;
+        if (missingFields.length > 0) {
+          errors.push(Diploma ${index + 1}: Missing or invalid fields: ${missingFields.join(', ')});
+        } else {
+          validDiplomas.push({
+            id: uuidv4(),
+            nom_Diplome: diploma.nomDiplome,
+            ecole: diploma.ecole,
+            ville: diploma.ville,
+            duree: diploma.duree,
+            mention_Bac: diploma.mentionBac || '',
+            filiere: diploma.filiere,
+            career: diploma.career,
+            employement_Opportunities: diploma.employmentOpportunities,
+            ancienne_Diplome: diploma.ancienneDiplome || [],
+            matieres_Diplome: diploma.matieresDiplome,
+            matieres_Etudiant: diploma.matieresEtudiant
+          });
         }
       });
 
-      // Validate all required
-      const missingValues = requiredFields.filter(field => {
-        const val = diploma[field as keyof Diploma];
-        if (field === 'duree') return typeof val !== 'number' || val <= 0;
-        if (Array.isArray(val)) return val.length === 0;
-        return !val;
-      });
-
-      if (missingValues.length > 0) {
-        errors.push(`Line ${i + 1}: Missing/invalid fields: ${missingValues.join(', ')}`);
-      } else {
-        diplomas.push(diploma as Diploma);
+      if (errors.length > 0) {
+        return { success: false, message: errors.slice(0, 5).join('\n'), diplomas: [] };
       }
+
+      return { success: true, message: '', diplomas: validDiplomas };
+    } catch (error) {
+      return { success: false, message: 'Invalid JSON format.', diplomas: [] };
     }
-
-    if (errors.length > 0) {
-      return { success: false, message: errors.slice(0, 5).join('\n'), diplomas: [] };
-    }
-
-    return { success: true, message: '', diplomas };
-  };
-
-  const parseCSVLine = (line: string): string[] => {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        result.push(current);
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-
-    result.push(current);
-    return result;
   };
 
   const clearFile = () => {
@@ -190,7 +161,7 @@ export const CSVUpload: React.FC = () => {
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Upload CSV File</h2>
+      <h2 className="text-lg font-medium text-gray-900 mb-4">Upload JSON File</h2>
 
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center ${
@@ -212,12 +183,12 @@ export const CSVUpload: React.FC = () => {
             </button>{' '}
             or drag and drop
           </div>
-          <p className="text-xs text-gray-500">CSV files only</p>
+          <p className="text-xs text-gray-500">JSON files only</p>
         </div>
         <input
           ref={fileInputRef}
           type="file"
-          accept=".csv"
+          accept=".json"
           className="hidden"
           onChange={handleFileChange}
         />
@@ -245,7 +216,7 @@ export const CSVUpload: React.FC = () => {
       )}
 
       {uploadResult.message && (
-        <div className={`rounded-md mt-4 p-4 ${uploadResult.success ? 'bg-green-50' : 'bg-red-50'}`}>
+        <div className={rounded-md mt-4 p-4 ${uploadResult.success ? 'bg-green-50' : 'bg-red-50'}}>
           <div className="flex">
             <div className="flex-shrink-0">
               {uploadResult.success ? (
@@ -255,7 +226,7 @@ export const CSVUpload: React.FC = () => {
               )}
             </div>
             <div className="ml-3">
-              <h3 className={`text-sm font-medium ${uploadResult.success ? 'text-green-800' : 'text-red-800'}`}>
+              <h3 className={text-sm font-medium ${uploadResult.success ? 'text-green-800' : 'text-red-800'}}>
                 {uploadResult.success ? 'Success!' : 'Error'}
               </h3>
               <div className="mt-2 text-sm">
@@ -273,7 +244,7 @@ export const CSVUpload: React.FC = () => {
           disabled={!file || isUploading}
           className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isUploading ? 'Uploading...' : 'Upload CSV'}
+          {isUploading ? 'Uploading...' : 'Upload JSON'}
         </button>
       </div>
     </div>

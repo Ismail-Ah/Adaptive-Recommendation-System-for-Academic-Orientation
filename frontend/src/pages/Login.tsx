@@ -31,10 +31,11 @@ function Login() {
 
   const onSubmit = async (data: FormulaireConnexion) => {
     try {
-      const user = await login(data.identifiantEtudiant, data.motDePasse , data.role);
-      
 
-      if (user.role === 'ADMIN') {
+      const user = await login(data.identifiantEtudiant, data.motDePasse, data.role);
+      
+      if (user.role.toUpperCase() === 'ADMIN') {
+
         navigate('/admin-dashboard');
       } else {
         navigate('/profile');
