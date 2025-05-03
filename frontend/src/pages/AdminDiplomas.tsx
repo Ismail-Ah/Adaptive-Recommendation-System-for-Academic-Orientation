@@ -23,6 +23,7 @@ interface Diploma {
 const ITEMS_PER_PAGE = 10;
 
 const AdminDiplomas: React.FC = () => {
+  const BACKEND_URL_CHANGEMENT="http://localhost:8086";
   const { isAdmin, token } = useAuth();
   const navigate = useNavigate();
   const [diplomas, setDiplomas] = useState<Diploma[]>([]);
@@ -135,6 +136,13 @@ const AdminDiplomas: React.FC = () => {
             Authorization: `Bearer ${token}`
           }
         });
+        const response2 = await fetch(`${BACKEND_URL_CHANGEMENT}/api/diplomas-updated`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          }          });
+        console.log(response2);
         fetchDiplomas();
       } catch (err) {
         setError('Failed to delete diploma');
@@ -185,6 +193,13 @@ const AdminDiplomas: React.FC = () => {
           'Content-Type': 'application/json'
         }
       });
+      const response2 = await fetch(`${BACKEND_URL_CHANGEMENT}/api/diplomas-updated`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }          });
+      console.log(response2);
       setEditingDiploma(null);
       setFormData(null);
       fetchDiplomas();

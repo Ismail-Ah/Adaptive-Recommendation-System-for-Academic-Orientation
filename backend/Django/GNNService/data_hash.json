@@ -1,0 +1,23 @@
+{
+  "hash": "de719445179f7e12ae8b89a19e3d7bc5",
+  "rows": 264,
+  "columns": [
+    "Nom_Dipl\u00f4me",
+    "Ecole",
+    "Career",
+    "Employement_Opportunities",
+    "Ancienne_Diplome",
+    "Filiere",
+    "Dur\u00e9e",
+    "Mention_Bac",
+    "Ville",
+    "Matieres_Diplome",
+    "Matieres_Etudiant",
+    "Unique_Dipl\u00f4me"
+  ],
+  "timestamp": "2025-05-03T18:18:38.217437",
+  "unique_diplomas": 264,
+  "subjects_count": 21,
+  "careers_count": 130,
+  "fields_count": 7
+}

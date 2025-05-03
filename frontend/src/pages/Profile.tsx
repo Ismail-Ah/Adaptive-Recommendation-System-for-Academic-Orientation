@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, Save, UserCircle, BookOpen, Info } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext'; // Adjust path to your AuthContext
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 // Define types for User and form data
@@ -14,28 +14,22 @@ interface FormData {
   interests: string[];
   subjects: string[];
   careerAspirations: string[];
-  duree: number; // Changed to number
+  duree: number;
   montionBac: string;
 }
 
 // Predefined options (typed as const arrays)
 const availableInterests = [
-  'Mathématiques', 'Physique', 'Chimie', 'Sciences de la Vie et de la Terre',
-  'Informatique', 'Économie et Gestion', 'Littérature', 'Philosophie',
+  'Mathématiques',
+  'Physique',
+  'Chimie',
+  'Sciences de la Vie et de la Terre',
+  'Informatique',
+  'Économie et Gestion',
+  'Littérature',
+  'Philosophie',
 ] as const;
-const availableSubjects = [
-  'Mathématiques', 'Physique-Chimie', 'Sciences de la Vie et de la Terre',
-  'Français', 'Arabe', 'Histoire-Géographie', 'Philosophie',
-] as const;
-const availableCareerAspirations = [
-  'Ingénierie', 'Médecine', 'Droit', 'Économie', 'Enseignement',
-  'Technologie de l’Information', 'Arts et Lettres',
-] as const;
-const availableFilieres = [
-  'Sciences Mathématiques', 'Sciences Expérimentales', 'Sciences Économiques',
-  'Lettres et Sciences Humaines', 'Techniques',
-] as const;
-const availableStudyDurations = [2, 3, 4, 5] as const; // Changed to numbers
+
 const availableBacMentions = ['Passable', 'Assez Bien', 'Bien', 'Très Bien'] as const;
 
 const Profile: React.FC = () => {
@@ -49,10 +43,52 @@ const Profile: React.FC = () => {
     interests: [],
     subjects: [],
     careerAspirations: [],
-    duree: 2, // Default to 2 as a number
+    duree: 2,
     montionBac: '',
   });
+  const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+  const [availableFilieres, setAvailableFilieres] = useState<string[]>([]);
+  const [availableStudyDurations, setAvailableStudyDurations] = useState<number[]>([]);
+  const [availableCareerAspirations, setAvailableCareerAspirations] = useState<string[]>([]);
+  const [availableBacMentions, setAvailableBacMentions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [subjectsRes, filieresRes, dureesRes, careersRes, mentionsRes] = await Promise.all([
+          fetch('http://localhost:8080/api/diplomas/subjects-etud'),
+          fetch('http://localhost:8080/api/diplomas/filiers'),
+          fetch('http://localhost:8080/api/diplomas/durees'),
+          fetch('http://localhost:8080/api/diplomas/careers'),
+          fetch('http://localhost:8080/api/diplomas/mentions')
+        ]);
+
+        const [subjectsData, filieresData, dureesData, careersData, mentionsData] = await Promise.all([
+          subjectsRes.json(),
+          filieresRes.json(),
+          dureesRes.json(),
+          careersRes.json(),
+          mentionsRes.json()
+        ]);
+
+        setAvailableSubjects(subjectsData);
+        setAvailableFilieres(filieresData);
+        setAvailableStudyDurations(dureesData);
+        setAvailableCareerAspirations(careersData);
+        setAvailableBacMentions(mentionsData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load form data. Please try again later.');
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -64,7 +100,7 @@ const Profile: React.FC = () => {
         interests: user.interests || [],
         subjects: user.subjects || [],
         careerAspirations: user.careerAspirations || [],
-        duree: user.duree !== undefined ? user.duree : 2, // Default to 2 if undefined
+        duree: user.duree !== undefined ? user.duree : 2,
         montionBac: user.montionBac || '',
       });
     }
@@ -73,7 +109,7 @@ const Profile: React.FC = () => {
   const handleAddItem = (field: keyof Pick<FormData, 'interests' | 'subjects' | 'careerAspirations'>): void => {
     setFormData({
       ...formData,
-      [field]: [...formData[field], ''], // Add empty string for new item
+      [field]: [...formData[field], ''],
     });
   };
 
@@ -96,7 +132,7 @@ const Profile: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await updateProfile(formData); // Pass formData with duree as number
+      await updateProfile(formData);
       console.log('Profile updated successfully');
       setTimeout(() => setIsSubmitting(false), 600);
     } catch (error) {
@@ -148,9 +184,7 @@ const Profile: React.FC = () => {
                   type="text"
                   id="name"
                   value={formData.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className={`block w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200`}
                   placeholder="Entrez votre nom complet"
                 />
@@ -173,9 +207,7 @@ const Profile: React.FC = () => {
                     <select
                       id="year"
                       value={formData.year}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        setFormData({ ...formData, year: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                       className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all`}
                     >
                       <option value="">Sélectionnez une année</option>
@@ -192,9 +224,7 @@ const Profile: React.FC = () => {
                     <select
                       id="filiere"
                       value={formData.filiere}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        setFormData({ ...formData, filiere: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, filiere: e.target.value })}
                       disabled={!formData.year}
                       className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm transition-all focus:ring-indigo-500 focus:border-indigo-500 ${
                         !formData.year ? (isDarkMode ? "bg-gray-800 cursor-not-allowed" : "bg-gray-200 cursor-not-allowed") : ""
@@ -217,18 +247,16 @@ const Profile: React.FC = () => {
                     <select
                       id="montionBac"
                       value={formData.montionBac}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        setFormData({ ...formData, montionBac: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, montionBac: e.target.value })}
                       disabled={!formData.year || formData.year !== "2ème Bac"}
                       className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm transition-all focus:ring-indigo-500 focus:border-indigo-500 ${
                         !formData.year || formData.year !== "2ème Bac" ? (isDarkMode ? "bg-gray-800 cursor-not-allowed" : "bg-gray-200 cursor-not-allowed") : ""
                       }`}
                     >
                       <option value="">Sélectionnez une mention</option>
-                      {availableBacMentions.map((montionBac) => (
-                        <option key={montionBac} value={montionBac}>
-                          {montionBac}
+                      {availableBacMentions.map((mention) => (
+                        <option key={mention} value={mention}>
+                          {mention}
                         </option>
                       ))}
                     </select>
@@ -239,14 +267,12 @@ const Profile: React.FC = () => {
 
             <div className="space-y-2">
               <label htmlFor="duree" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Durée d'Étude Voulue Post-Bac (années)
+                Durée d&apos;Étude Voulue Post-Bac (années)
               </label>
               <select
                 id="duree"
                 value={formData.duree}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setFormData({ ...formData, duree: Number(e.target.value) })
-                }
+                onChange={(e) => setFormData({ ...formData, duree: Number(e.target.value) })}
                 className={`w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all`}
               >
                 <option value="">Sélectionnez une durée</option>
@@ -269,9 +295,7 @@ const Profile: React.FC = () => {
                   <div key={index} className="flex items-center gap-4 animate-fade-in">
                     <select
                       value={subject}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        handleItemChange('subjects', index, e.target.value)
-                      }
+                      onChange={(e) => handleItemChange('subjects', index, e.target.value)}
                       className={`block w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200`}
                     >
                       <option value="">Sélectionnez une matière</option>
@@ -313,9 +337,7 @@ const Profile: React.FC = () => {
                   <div key={index} className="flex items-center gap-4 animate-fade-in">
                     <select
                       value={aspiration}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        handleItemChange('careerAspirations', index, e.target.value)
-                      }
+                      onChange={(e) => handleItemChange('careerAspirations', index, e.target.value)}
                       className={`block w-full rounded-xl ${isDarkMode ? 'bg-gray-700 border-gray-600 text-gray-300' : 'border-gray-200 text-gray-900'} px-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 transition-all duree-200`}
                     >
                       <option value="">Sélectionnez une aspiration</option>

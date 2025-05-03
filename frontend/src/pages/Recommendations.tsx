@@ -16,7 +16,7 @@ interface DiplomaRecommendation {
   Career: string[];
   Filiere: string[];
   Mention_Bac: string;
-  match_percentage: number | null;
+  match_percentage: number;
 }
 
 interface FilterOptions {
@@ -52,7 +52,7 @@ const useRecommendations = () => {
                         diploma.Mention_Bac === "Bien" ? 40 : 
                         diploma.Mention_Bac === "Assez Bien" ? 30 : 20;
 
-    return Math.round(subjectMatchPercentage + mentionMatch);
+    return subjectMatchPercentage + mentionMatch;
   };
 
   const fetchRecommendations = async () => {
@@ -64,7 +64,7 @@ const useRecommendations = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/recommend-diplomas', {
+      const response = await fetch('api/v1/recommend-diplomas', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,6 +73,11 @@ const useRecommendations = () => {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        if (errorText.includes('No diploma')) {
+          setRecommendations([]);
+          return;
+        }
         throw new Error(`Failed to fetch recommendations: ${response.status}`);
       }
 
@@ -85,7 +90,7 @@ const useRecommendations = () => {
       setRecommendations(dataWithMatch);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
-      setRecommendations(null);
+      setRecommendations([]);
     } finally {
       setIsLoading(false);
     }
@@ -231,11 +236,11 @@ const DiplomaCard: React.FC<{
           </div>
           <div className="flex flex-col items-end gap-2">
             <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
-              (diploma.match_percentage ?? 0) >= 90 ? 'bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-200' : 
-              (diploma.match_percentage ?? 0) >= 80 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 
+              diploma.match_percentage >= 90 ? 'bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-200' : 
+              diploma.match_percentage >= 80 ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200' : 
               'bg-yellow-50 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200'
             }`}>
-              {(diploma.match_percentage ?? 0)}% Match
+              {diploma.match_percentage.toFixed(1)}% Match
             </span>
           </div>
         </div>

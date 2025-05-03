@@ -27,7 +27,7 @@ import com.example.diplomasRecommendation.Model.Filiere;
 import com.example.diplomasRecommendation.Model.MatiereDiplome;
 import com.example.diplomasRecommendation.Model.MatiereEtudiant;
 import com.example.diplomasRecommendation.Model.Mention;
-
+import com.example.diplomasRecommendation.Model.QualifieForRelationship;
 import com.example.diplomasRecommendation.Model.User;
 import com.example.diplomasRecommendation.Service.CareerService;
 import com.example.diplomasRecommendation.Service.DiplomeService;
@@ -96,6 +96,37 @@ public class UserDiplomeController {
     public void recommendNewDiplomasAll(HttpServletRequest request) {
         logger.info("Entering recommendNewDiplomasAll endpoint");
         logger.info("Request headers: {}", request.getHeaderNames());
+
+
+
+
+
+
+        String url = "http://gnn-service/api/retrain/";
+        logger.info("Calling GNN service at URL: {}", url);
+
+        // Utiliser HttpEntity sans en-têtes
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null);
+
+        try {
+            // Exécution de la requête GET sans en-têtes
+            ResponseEntity<Void> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                requestEntity,
+                Void.class
+            );
+
+            logger.info("GNN retrain triggered. Response status: {}", response.getStatusCode());
+
+        } catch (Exception e) {
+            logger.error("Error calling GNN service", e);
+        }
+
+
+
+
+
         List<UserDTO> usersDTO = userController.getAllUsers(request);
         logger.info("Fetched all users, count: {}", usersDTO.size());
         for (UserDTO user : usersDTO) {
@@ -114,22 +145,22 @@ public class UserDiplomeController {
         logger.info("Fetched UserDTO: {}", userDTO);
         logger.info("UserDTO email: {}", userDTO.getEmail());
 
-        List<Diplome> diplomes = new ArrayList<>();
         List<DiplomeDTO> diplomesDTO = new ArrayList<>();
         User user = userService.findByEmail(userDTO.getEmail());
         logger.info("User fetched from database: {}", user);
         if (user != null) {
             logger.info("User exists with email: {}", user.getEmail());
-            diplomes = user.getDiplomes();
-            logger.info("Diplomes associated with user: {}", diplomes);
-            for (Diplome diplome : diplomes) {
+            List<QualifieForRelationship> relationships = user.getDiplomeRelationships();
+            logger.info("Diploma relationships associated with user: {}", relationships);
+            for (QualifieForRelationship relationship : relationships) {
+                Diplome diplome = relationship.getDiplome();
                 logger.info("Processing diplome: {}", diplome);
                 DiplomeDTO diplomeDTO = new DiplomeDTO();
                 diplomeDTO.setNom_Diplôme(diplome.getName());
                 diplomeDTO.setVille(diplome.getVille());
                 diplomeDTO.setEcole(diplome.getEcole());
                 diplomeDTO.setDurée(diplome.getDuration());
-               
+                diplomeDTO.setMatch_percentage(relationship.getMatchPercentage()); // Set match percentage
                 diplomeDTO.setMention_Bac(diplome.getMention() != null ? diplome.getMention().getMention() : null);
                 logger.info("Set Mention_Bac: {}", diplomeDTO.getMention_Bac());
 
@@ -187,7 +218,6 @@ public class UserDiplomeController {
         logger.info("Exiting recommendDiplomas endpoint");
         return ResponseEntity.ok(diplomesDTO);
     }
-
     private List<DiplomeDTO> GNNRecommend(UserDTO userDTO) {
         logger.info("Entering GNNRecommend for userDTO: {}", userDTO);
 
@@ -231,23 +261,44 @@ public class UserDiplomeController {
     private void storeDiplomasAndUser(List<DiplomeDTO> diplomasDTO, String email) {
         logger.info("Entering storeDiplomasAndUser for email: {}", email);
         logger.info("DiplomasDTO to store: {}", diplomasDTO);
-    
-        List<Diplome> diplomes = new ArrayList<>();
-    
+
+        List<QualifieForRelationship> diplomeRelationships = new ArrayList<>();
+
+        // Step 1: Fetch or create the user
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            logger.info("User not found, creating new user with email: {}", email);
+            user = new User();
+            user.setEmail(email);
+            user.setDiplomeRelationships(new ArrayList<>());
+        } else {
+            logger.info("User found: {}", user);
+            // Step 2: Delete existing diploma relationships
+            List<QualifieForRelationship> existingRelationships = user.getDiplomeRelationships();
+            if (existingRelationships != null && !existingRelationships.isEmpty()) {
+                logger.info("Deleting {} existing diploma relationships for user: {}", existingRelationships.size(), email);
+                for (QualifieForRelationship relationship : existingRelationships) {
+                    diplomeService.delete(relationship.getDiplome());
+                    logger.info("Deleted diploma: {}", relationship.getDiplome().getName());
+                }
+            }
+            user.setDiplomeRelationships(new ArrayList<>());
+        }
+
+        // Step 3: Process and save new diplomas
         for (DiplomeDTO diplomeDTO : diplomasDTO) {
             try {
                 logger.info("Processing diplomeDTO: {}", diplomeDTO);
                 Diplome diplome = new Diplome();
-                // Do NOT set ID; let Neo4j generate it
                 diplome.setName(diplomeDTO.getNom_Diplôme());
                 diplome.setVille(diplomeDTO.getVille() != null ? diplomeDTO.getVille() : "Unknown");
                 diplome.setEcole(diplomeDTO.getEcole() != null ? diplomeDTO.getEcole() : "Unknown");
                 diplome.setDuration(diplomeDTO.getDurée() != null ? diplomeDTO.getDurée() : 0);
-                logger.info("Created diplome: name={}, ville={}, ecole={}, duration={}, match_percentage={}",
+                logger.info("Created diplome: name={}, ville={}, ecole={}, duration={}",
                         diplome.getName(), diplome.getVille(), diplome.getEcole(), diplome.getDuration());
-    
+
+                // Handle Mention
                 Mention mention = mentionService.findByName(diplomeDTO.getMention_Bac());
-                logger.info("Fetched mention: {}", mention);
                 if (mention == null && diplomeDTO.getMention_Bac() != null) {
                     mention = new Mention();
                     mention.setMention(diplomeDTO.getMention_Bac());
@@ -256,14 +307,14 @@ public class UserDiplomeController {
                 }
                 diplome.setMention(mention);
                 logger.info("Set mention for diplome: {}", mention);
-    
+
+                // Handle Ancienne Diplome
                 Set<Diplome> diplomeSet = diplomeDTO.getAncienne_Diplome() != null ?
                         diplomeDTO.getAncienne_Diplome().stream()
                                 .filter(name -> name != null && !name.trim().isEmpty())
                                 .map(name -> {
                                     logger.info("Processing ancienne diplome with name: {}", name);
                                     Diplome d = diplomeService.findByName(name);
-                                    logger.info("Found diplome: {}", d);
                                     if (d == null) {
                                         d = new Diplome();
                                         d.setName(name);
@@ -279,14 +330,14 @@ public class UserDiplomeController {
                                 })
                                 .collect(Collectors.toSet()) : new HashSet<>();
                 diplome.setDiplomes(diplomeSet);
-    
+
+                // Handle Employment Opportunities
                 Set<EmploymentOpportunity> opportunities = diplomeDTO.getEmployement_Opportunities() != null ?
                         diplomeDTO.getEmployement_Opportunities().stream()
                                 .filter(opp -> opp != null && !opp.trim().isEmpty())
                                 .map(opp -> {
                                     logger.info("Fetching employment opportunity: {}", opp);
                                     EmploymentOpportunity e = employmentService.findByName(opp);
-                                    logger.info("Found employment opportunity: {}", e);
                                     if (e == null) {
                                         e = new EmploymentOpportunity();
                                         e.setOppotunity(opp);
@@ -298,14 +349,14 @@ public class UserDiplomeController {
                                 .collect(Collectors.toSet()) : new HashSet<>();
                 diplome.setOpportunities(opportunities);
                 logger.info("Set opportunities: {}", opportunities);
-    
+
+                // Handle Careers
                 Set<Career> careers = diplomeDTO.getCareer() != null ?
                         diplomeDTO.getCareer().stream()
                                 .filter(careerName -> careerName != null && !careerName.trim().isEmpty())
                                 .map(careerName -> {
                                     logger.info("Fetching career: {}", careerName);
                                     Career c = careerService.findByName(careerName);
-                                    logger.info("Found career: {}", c);
                                     if (c == null) {
                                         c = new Career();
                                         c.setCareer(careerName);
@@ -314,17 +365,18 @@ public class UserDiplomeController {
                                     }
                                     return c;
                                 })
+                            
                                 .collect(Collectors.toSet()) : new HashSet<>();
                 diplome.setCareers(careers);
                 logger.info("Set careers: {}", careers);
-    
+
+                // Handle Filieres
                 Set<Filiere> filieres = diplomeDTO.getFiliere() != null ?
                         diplomeDTO.getFiliere().stream()
                                 .filter(fil -> fil != null && !fil.trim().isEmpty())
                                 .map(fil -> {
                                     logger.info("Fetching filiere: {}", fil);
                                     Filiere f = filiereService.findByName(fil);
-                                    logger.info("Found filiere: {}", f);
                                     if (f == null) {
                                         f = new Filiere();
                                         f.setFiliere(fil);
@@ -336,14 +388,14 @@ public class UserDiplomeController {
                                 .collect(Collectors.toSet()) : new HashSet<>();
                 diplome.setFilieres(filieres);
                 logger.info("Set filieres: {}", filieres);
-    
+
+                // Handle MatiereEtudiant
                 Set<MatiereEtudiant> matiereEtudiants = diplomeDTO.getMatieres_Etudiant() != null ?
                         diplomeDTO.getMatieres_Etudiant().stream()
                                 .filter(mat -> mat != null && !mat.trim().isEmpty())
                                 .map(mat -> {
                                     logger.info("Fetching matiereEtudiant: {}", mat);
                                     MatiereEtudiant m = matiereEtudService.findByName(mat);
-                                    logger.info("Found matiereEtudiant: {}", m);
                                     if (m == null) {
                                         m = new MatiereEtudiant();
                                         m.setMatiere(mat);
@@ -355,14 +407,14 @@ public class UserDiplomeController {
                                 .collect(Collectors.toSet()) : new HashSet<>();
                 diplome.setMatiereEtudiants(matiereEtudiants);
                 logger.info("Set matiereEtudiants: {}", matiereEtudiants);
-    
+
+                // Handle MatiereDiplome
                 Set<MatiereDiplome> matiereDiplomes = diplomeDTO.getMatieres_Diplome() != null ?
                         diplomeDTO.getMatieres_Diplome().stream()
                                 .filter(mat -> mat != null && !mat.trim().isEmpty())
                                 .map(mat -> {
                                     logger.info("Fetching matiereDiplome: {}", mat);
                                     MatiereDiplome m = matiereDiplomeService.findByName(mat);
-                                    logger.info("Found matiereDiplome: {}", m);
                                     if (m == null) {
                                         m = new MatiereDiplome();
                                         m.setMatiere(mat);
@@ -374,30 +426,31 @@ public class UserDiplomeController {
                                 .collect(Collectors.toSet()) : new HashSet<>();
                 diplome.setMatiereDiplomes(matiereDiplomes);
                 logger.info("Set matiereDiplomes: {}", matiereDiplomes);
-    
+
+                // Save the diploma
                 diplomeService.save(diplome);
-                diplomes.add(diplome);
-                logger.info("Added diplome to list: {}", diplome);
+
+                // Create the relationship with match_percentage
+                Double matchPercentage = diplomeDTO.getMatch_percentage() != null ? diplomeDTO.getMatch_percentage() : 0.0;
+                QualifieForRelationship relationship = new QualifieForRelationship(diplome, matchPercentage);
+                diplomeRelationships.add(relationship);
+                logger.info("Added relationship for diplome: {} with matchPercentage: {}", diplome.getName(), matchPercentage);
             } catch (Exception e) {
                 logger.error("Failed to process diplomeDTO: {}. Continuing with next diploma.", diplomeDTO.getNom_Diplôme(), e);
-                // Continue to next diploma instead of failing
             }
         }
-    
+
+        // Step 4: Associate new diploma relationships with the user and save
         try {
-            logger.info("Creating user with email: {}", email);
-            User user = new User();
-            user.setEmail(email);
-            user.setDiplomes(diplomes);
-            logger.info("User prepared: {}", user);
-    
+            user.setDiplomeRelationships(diplomeRelationships);
+            logger.info("User prepared with {} diploma relationships: {}", diplomeRelationships.size(), user);
             userService.save(user);
             logger.info("Saved user: {}", user);
         } catch (Exception e) {
             logger.error("Failed to save user: {}", email, e);
             throw new RuntimeException("Failed to save user", e);
         }
-    
-        logger.info("Exiting storeDiplomasAndUser with {} diplomas saved", diplomes.size());
+
+        logger.info("Exiting storeDiplomasAndUser with {} diploma relationships saved", diplomeRelationships.size());
     }
 }

@@ -52,7 +52,7 @@ export const DiplomaStatistics: React.FC = () => {
         setLoading(true);
         const response = await axios.get<Diploma[]>('http://localhost:8080/api/diplomas/diplomas', {
           headers: {
-            Authorization: Bearer ${token},
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
@@ -176,42 +176,42 @@ export const DiplomaStatistics: React.FC = () => {
     if (!filteredStats) return;
 
     let csv = "Diploma Statistics Summary\n";
-    csv += Total Diplomas,${filteredStats.total}\n;
-    csv += Average Duration (Years),${filteredStats.averageDuration.toFixed(1)}\n\n;
+    csv += `Total Diplomas,${filteredStats.total}\n`;
+    csv += `Average Duration (Years),${filteredStats.averageDuration.toFixed(1)}\n\n`;
 
     csv += "By School\nSchool,Count\n";
     Object.entries(filteredStats.byEcole).forEach(([school, count]) => {
-      csv += ${school},${count}\n;
+      csv += `${school},${count}\n`;
     });
 
     csv += "\nBy City\nCity,Count\n";
     Object.entries(filteredStats.byVille).forEach(([city, count]) => {
-      csv += ${city},${count}\n;
+      csv += `${city},${count}\n`;
     });
 
     csv += "\nBy Field\nField,Count\n";
     Object.entries(filteredStats.byFiliere).forEach(([filiere, count]) => {
-      csv += ${filiere},${count}\n;
+      csv += `${filiere},${count}\n`;
     });
 
     csv += "\nBy Mention Bac\nMention,Count\n";
     Object.entries(filteredStats.byMentionBac).forEach(([mention, count]) => {
-      csv += ${mention},${count}\n;
+      csv += `${mention},${count}\n`;
     });
 
     csv += "\nBy Duration\nYears,Count\n";
     Object.entries(filteredStats.byDuree).forEach(([duree, count]) => {
-      csv += ${duree},${count}\n;
+      csv += `${duree},${count}\n`;
     });
 
     csv += "\nTop Careers\nCareer,Count\n";
     filteredStats.topCareers.forEach(({ name, count }) => {
-      csv += ${name},${count}\n;
+      csv += `${name},${count}\n`;
     });
 
     csv += "\nTop Employment Opportunities\nOpportunity,Count\n";
     filteredStats.topEmploymentOpportunities.forEach(({ name, count }) => {
-      csv += ${name},${count}\n;
+      csv += `${name},${count}\n`;
     });
 
     const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csv);
@@ -292,7 +292,7 @@ export const DiplomaStatistics: React.FC = () => {
             type="text"
             value={filterValue}
             onChange={(e) => setFilterValue(e.target.value)}
-            placeholder={Filter by ${activeFilter}}
+            placeholder={`Filter by ${activeFilter}`}
             className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         )}

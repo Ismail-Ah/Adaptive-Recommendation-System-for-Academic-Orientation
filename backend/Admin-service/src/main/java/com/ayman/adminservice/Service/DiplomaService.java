@@ -56,8 +56,8 @@ public class DiplomaService {
         return diplomaRepository.findAll();
     }
 
-    public Optional<Diploma> getDiplomaById(Long id) {
-        return diplomaRepository.findById(id);
+    public Optional<Diploma> getDiplomaById(String name) {
+        return diplomaRepository.findById(name);
     }
 
     public Diploma saveDiploma(Diploma diploma) {

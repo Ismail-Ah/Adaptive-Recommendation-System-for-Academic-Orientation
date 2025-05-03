@@ -5,8 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ayman.adminservice.DTO.DiplomaDetailedDTO;
 import com.ayman.adminservice.Model.*;
-
+import com.ayman.adminservice.Repository.CareerRepository;
+import com.ayman.adminservice.Repository.DurationRepository;
+import com.ayman.adminservice.Repository.EtudiantSubjectRepository;
+import com.ayman.adminservice.Repository.FiliereRepository;
+import com.ayman.adminservice.Repository.MentionBacRepository;
 import com.ayman.adminservice.Service.DiplomaService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +23,21 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/diplomas")
 @CrossOrigin(origins = "*") // Allow frontend (React) access
 public class DiplomaController {
+
+    @Autowired
+    private CareerRepository careerRepository;
+
+    @Autowired
+    private EtudiantSubjectRepository etudiantSubjectRepository;
+
+    @Autowired
+    private DurationRepository durationRepository;
+
+    @Autowired
+    private FiliereRepository filiereRepository;
+
+    @Autowired
+    private MentionBacRepository mentionBacRepository;
 
     private final DiplomaService diplomaService;
 
@@ -29,9 +50,51 @@ public class DiplomaController {
         return diplomaService.getAllDiplomas();
     }
 
-    @GetMapping("/{id}")
-    public Optional<Diploma> getDiplomaById(@PathVariable Long id) {
-        return diplomaService.getDiplomaById(id);
+    
+
+    @GetMapping("/careers")
+    public ResponseEntity<List<String>> getCareerNames() {
+        List<String> careerNames = careerRepository.findAll()
+            .stream()
+            .map(Career::getName) // Assuming your Career entity has a getName() method
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(careerNames);
+    }
+
+    @GetMapping("/durees")
+    public ResponseEntity<List<Integer>> getDurees() {
+        List<Integer> durees = durationRepository.findAll()
+            .stream()
+            .map(Duration::getValue) // Assuming your Career entity has a getName() method
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(durees);
+    }
+
+    @GetMapping("/filiers")
+    public ResponseEntity<List<String>> getFiliers() {
+        List<String> filieres = filiereRepository.findAll()
+            .stream()
+            .map(Filiere::getName) // Assuming your Career entity has a getName() method
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(filieres);
+    }
+
+    @GetMapping("/subjects-etud")
+    public ResponseEntity<List<String>> getSubjectsEtud() {
+        List<String> subjects = etudiantSubjectRepository.findAll()
+            .stream()
+            .map(EtudiantSubject::getName) // Assuming your Career entity has a getName() method
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(subjects);
+    }
+
+    @GetMapping("/mentions")
+    public ResponseEntity<List<String>> getMention() {
+        List<String> mentions = mentionBacRepository.findAll()
+            .stream()
+            .map(MentionBac::getName) // Assuming your Career entity has a getName() method
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(mentions);
     }
 
     @PostMapping
@@ -77,9 +140,9 @@ public class DiplomaController {
 
             // Handle non-collection fields with null checks
 
-            if (d.getId() != null) {
-                diplomaDetailedDTO.setId(d.getId());
-            }
+            
+            diplomaDetailedDTO.setId(110l);
+            
             if (d.getEcole() != null) {
                 diplomaDetailedDTO.setEcole(d.getEcole().getName());
             }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface DiplomaRepository extends Neo4jRepository<Diploma, Long> {
+public interface DiplomaRepository extends Neo4jRepository<Diploma, String> {
     @Query("MATCH (d:Diplome)-[:OFFERED_BY]->(:Ecole)\n" +
             "RETURN count(d) AS totalDiplomasWithSchool")
     long countDistinctDiplomas();

@@ -10,9 +10,6 @@ import java.util.List;
 public class Diploma {
 
     @Id
-    @GeneratedValue
-    private Long id;
-
     private String name;
 
     @Relationship(type = "BELONGS_TO_FILIERE", direction = Relationship.Direction.OUTGOING)
@@ -50,14 +47,6 @@ public class Diploma {
 
     public void setDuree(Duration duree) {
         this.duree = duree;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getNomDiplome() {

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
 
 from pathlib import Path
 
@@ -81,6 +82,9 @@ DATABASES = {
     }
 }
 
+NEO4J_URI = os.environ.get('NEO4J_URI', 'bolt://localhost:7691')
+NEO4J_USERNAME = os.environ.get('NEO4J_USERNAME', 'neo4j')
+NEO4J_PASSWORD = os.environ.get('NEO4J_PASSWORD', 'pfa_diplomas')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -112,6 +116,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+BASE_DIR=BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -122,10 +127,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-NEO4J_CONFIG = {
-    'uri': 'bolt://localhost:7687',  # Update with your Neo4j URI
-    'username': 'neo4j',
-    'password': ''  # Update with your Neo4j password
-}

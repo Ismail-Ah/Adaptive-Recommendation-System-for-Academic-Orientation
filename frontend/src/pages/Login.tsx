@@ -34,7 +34,7 @@ function Login() {
 
       const user = await login(data.identifiantEtudiant, data.motDePasse, data.role);
       
-      if (user.role.toUpperCase() === 'ADMIN') {
+      if (user.role?.toUpperCase() === 'ADMIN') {
 
         navigate('/admin-dashboard');
       } else {

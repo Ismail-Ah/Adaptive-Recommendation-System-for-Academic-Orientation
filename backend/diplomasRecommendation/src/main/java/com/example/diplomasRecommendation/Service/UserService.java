@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.diplomasRecommendation.Model.Diplome;
 import com.example.diplomasRecommendation.Model.User;
 import com.example.diplomasRecommendation.Repository.UserRepository;
 
@@ -24,6 +25,7 @@ public class UserService {
         userRepository.save(user);
         logger.info("User saved successfully in userdiplomas database");
     }
+    
 
     public User findByEmail(String email) {
         logger.info("Searching for user with email: {}", email);

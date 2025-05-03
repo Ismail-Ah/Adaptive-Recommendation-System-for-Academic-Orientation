@@ -16,6 +16,7 @@ public class User {
     private String name;
     private String password; // Consider hashing this (e.g., with BCrypt)
     private String year;
+    private String role;
 
     // Relationships to Interest nodes
     @Relationship(type = "INTERESTED_IN", direction = Relationship.Direction.OUTGOING)

@@ -19,6 +19,9 @@ public class DiplomeService{
     public Diplome findByName(String name) {
         return diplomeRepository.findByName(name);
     }
+    public void delete(Diplome diplome) {
+        diplomeRepository.delete(diplome); // Assuming repository is a Neo4j repository
+    }
 
     public Diplome findById(String diplome){
         return diplomeRepository.findById(diplome).orElse(null);

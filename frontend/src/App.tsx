@@ -108,6 +108,7 @@ function App() {
 
 
           </div>
+          </div>
         </Router>
       </AuthProvider>
     </ThemeProvider>

@@ -15,9 +15,26 @@ public class User {
     private String email;
 
     @Relationship(type = "QUALIFIE_FOR")
-    private List<Diplome> diplomes;
+    private List<QualifieForRelationship> diplomeRelationships;
 
     public User() {
-        this.diplomes = new ArrayList<>();
+        this.diplomeRelationships = new ArrayList<>();
+    }
+
+    // Helper method to get diplomas (optional, for convenience)
+    public List<Diplome> getDiplomes() {
+        List<Diplome> diplomes = new ArrayList<>();
+        for (QualifieForRelationship relationship : diplomeRelationships) {
+            diplomes.add(relationship.getDiplome());
+        }
+        return diplomes;
+    }
+
+    // Helper method to set diplomas (optional, for compatibility)
+    public void setDiplomes(List<Diplome> diplomes) {
+        this.diplomeRelationships = new ArrayList<>();
+        for (Diplome diplome : diplomes) {
+            this.diplomeRelationships.add(new QualifieForRelationship(diplome, 0.0)); // Default match_percentage
+        }
     }
 }

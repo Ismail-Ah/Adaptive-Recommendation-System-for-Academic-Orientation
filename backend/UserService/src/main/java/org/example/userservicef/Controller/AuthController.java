@@ -80,12 +80,8 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         // Handle Year relationship
-        Year year = yearRepository.findByName(userDTO.getYear());
-        if (year == null) {
-            year = new Year(userDTO.getYear());
-            yearRepository.save(year);
-        }
-        user.setYear(year);
+       
+        user.setYear(userDTO.getYear());
 
         // Handle Filiere relationship
         Filiere filiere = filiereRepository.findByName(userDTO.getFiliere());
@@ -132,7 +128,7 @@ public class AuthController {
                 user.getEmail(),
                 user.getEmail(),
                 user.getName(),
-                user.getYear().getName(), // Return year name
+                user.getYear(), // Return year name
                 user.getFiliere().getName(), // Return filiere name
                 user.getDuree().getName(), 
                 user.getMontionBac().getName(), 
@@ -163,7 +159,7 @@ public class AuthController {
         logger.info("Raw User from repository: email={}, name={}, year={}, filiere={}, interests={}, subjects={}, careerAspirations={}",
                 user.getEmail(),
                 user.getName(),
-                user.getYear() != null ? user.getYear().getName() : "null",
+                user.getYear() != null ? user.getYear() : "null",
                 user.getFiliere() != null ? user.getFiliere().getName() : "null",
                 user.getDuree() != null ? user.getDuree().getName() : 0,
                 user.getMontionBac() != null ? user.getMontionBac().getName() : "null",
@@ -177,7 +173,7 @@ public class AuthController {
                 user.getEmail(),
                 user.getEmail(),
                 user.getName(),
-                user.getYear() != null ? user.getYear().getName() : "null", // Return year name
+                user.getYear() != null ? user.getYear() : "null", // Return year name
                 user.getFiliere() != null ? user.getFiliere().getName() : "null", // Return filiere name
                 user.getDuree() != null ? user.getDuree().getName() : 0, // Return filiere name
                 user.getMontionBac() != null ? user.getMontionBac().getName() : "null", // Return filiere name
@@ -209,12 +205,8 @@ public class AuthController {
         userDetailsService.deleteUserRelationships(existingUser.getEmail());
     
         // ✅ Step 2: Assign new relationships
-        Year year = yearRepository.findByName(updatedUserDTO.getYear());
-        if (year == null) {
-            year = new Year(updatedUserDTO.getYear());
-            yearRepository.save(year);
-        }
-        existingUser.setYear(year);
+        
+        existingUser.setYear(updatedUserDTO.getYear());
     
         Filiere filiere = filiereRepository.findByName(updatedUserDTO.getFiliere());
         if (filiere == null) {
@@ -255,7 +247,7 @@ public class AuthController {
         return ResponseEntity.ok(new UserResponse(
                 existingUser.getEmail(),
                 existingUser.getName(),
-                existingUser.getYear().getName(),
+                existingUser.getYear(),
                 existingUser.getFiliere().getName(),
                 existingUser.getDuree().getName(),
                 existingUser.getMontionBac().getName(),
@@ -289,7 +281,7 @@ public class AuthController {
         return ResponseEntity.ok(new UserResponse(
                 user.getEmail(),
                 user.getName(),
-                user.getYear() != null ? user.getYear().getName() : "null", // Return year name
+                user.getYear() != null ? user.getYear() : "null", // Return year name
                 user.getFiliere() != null ? user.getFiliere().getName() : "null", // Return filiere name
                 user.getDuree() != null ? user.getDuree().getName() : 0, // Return filiere name
                 user.getMontionBac() != null ? user.getMontionBac().getName() : "null", // Return filiere name
@@ -353,8 +345,8 @@ record AuthResponse(
 record UserResponse(
         String email,
         String name,
-        String year, 
-        String filiere, 
+        String year,
+        String filiere,
         int duree,
         String montionBac,
         Set<String> subjects,

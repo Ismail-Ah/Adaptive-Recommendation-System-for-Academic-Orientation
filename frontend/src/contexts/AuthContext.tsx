@@ -11,6 +11,7 @@ const initialState: AuthState = {
 };
 
 const BACKEND_URL = "http://localhost:8081";
+const BACKEND_URL_CHANGEMENT = "http://localhost:8086";
 
 type AuthAction =
   | { type: 'AUTH_START' }
@@ -80,9 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-
   const login = useCallback(async (studentId: string, password: string, isAdmin: string): Promise<User> => {
-
     try {
       dispatch({ type: 'AUTH_START' });
       console.log('Attempting login with:', { email: studentId, password, role: isAdmin });
@@ -92,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: studentId, password, role: isAdmin }),
       });
-
+      
       console.log('Login response status:', response.status);
       const responseText = await response.text();
       console.log('Login response text:', responseText);
@@ -103,7 +102,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const data = JSON.parse(responseText);
       console.log('Parsed login data:', data);
-
   
       const user: User = {
         id: data.id,
@@ -113,20 +111,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         montionBac: data.montionBac,
         duree: data.duree,
         year: data.year,
-
         interests: data.interests || [],
         subjects: data.subjects || [],
         careerAspirations: data.careerAspirations || [],
-
         role: data.role,
       };
   
       localStorage.setItem('token', data.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: data.token } });
   
-
       return user;
-
     } catch (error) {
       console.error('Login error:', error);
       localStorage.removeItem('token');
@@ -201,6 +195,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!response.ok) throw new Error('Failed to update profile');
       const updatedUser: User = await response.json();
       dispatch({ type: 'AUTH_SUCCESS', payload: { user: updatedUser, token } });
+      try {
+        const response2 = await fetch('/api/v2/profile-updated', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: 'include', // Include if your backend requires cookies or credentials
+        });
+      
+        if (!response2.ok) {
+          throw new Error(`HTTP error! status: ${response2.status}`);
+        }
+      
+        console.log('detect changement called correctly');
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+      
+
     } catch (error) {
       console.error('Profile update failed:', error);
       throw error;
@@ -210,7 +223,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = useCallback(() => {
     console.log('isAdmin check - User role:', state.user?.role);
     return state.user?.role?.toUpperCase() === 'ADMIN';
-
   }, [state.user]);
 
   return (

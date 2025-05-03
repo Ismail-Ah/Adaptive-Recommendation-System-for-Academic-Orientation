@@ -24,6 +24,7 @@ interface FormData {
 }
 
 export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
+  const BACKEND_URL_CHANGEMENT="http://localhost:8086";
   const { isAdmin, token } = useAuth();
   const navigate = useNavigate();
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -105,10 +106,17 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
     try {
       await axios.post('http://localhost:8080/api/diplomas/create', payload, {
         headers: {
-          Authorization: Bearer ${token},
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
+      const response2 = await fetch(`${BACKEND_URL_CHANGEMENT}/api/diplomas-updated`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }          });
+      console.log(response2);
 
       setFormSubmitted(true);
       setError(null);
@@ -140,7 +148,7 @@ export const DiplomaForm: React.FC<DiplomaFormProps> = ({ onSuccess }) => {
 
       // Navigate back to AdminDiplomas after a short delay to show success message
       setTimeout(() => {
-        navigate('/AdminDiplomas');
+        navigate('/admin-dashboard');
       }, 1500);
 
     } catch (err) {

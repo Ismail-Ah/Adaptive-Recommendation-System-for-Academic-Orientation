@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api/")
 public class UpdateController {
 
     @Autowired 

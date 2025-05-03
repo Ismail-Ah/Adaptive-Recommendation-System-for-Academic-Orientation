@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,7 +8,7 @@ import { Button } from '../components/ui/button';
 import { UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-// Moroccan curriculum-based interests and subjects
+// Moroccan curriculum-based interests
 const interests = [
   'Mathématiques',
   'Physique',
@@ -19,42 +19,6 @@ const interests = [
   'Littérature',
   'Philosophie',
 ];
-
-const subjects = [
-  'Mathématiques',
-  'Physique-Chimie',
-  'Sciences de la Vie et de la Terre',
-  'Français',
-  'Arabe',
-  'Histoire-Géographie',
-  'Philosophie',
-];
-
-// Career aspirations based on common Moroccan academic/professional paths
-const careerAspirations = [
-  'Ingénierie',
-  'Médecine',
-  'Droit',
-  'Économie',
-  'Enseignement',
-  'Technologie de l’Information',
-  'Arts et Lettres',
-];
-
-// Predefined filieres
-const filieres = [
-  'Sciences Mathématiques',
-  'Sciences Expérimentales',
-  'Sciences Économiques',
-  'Lettres et Sciences Humaines',
-  'Techniques',
-];
-
-// Predefined study durations
-const studyDurations = ['2 ans', '3 ans', '4 ans', '5 ans ou plus'];
-
-// Predefined Bac mentions (common in Moroccan system)
-const bacMentions = ['Passable', 'Assez Bien', 'Bien', 'Très Bien'];
 
 // Schema for registration
 const registerSchema = z.object({
@@ -70,7 +34,7 @@ const registerSchema = z.object({
   careerAspirations: z
     .array(z.string())
     .min(1, 'Sélectionnez au moins une aspiration professionnelle'),
-  studyDuration: z.string().min(1, 'Sélectionnez la durée d’étude voulue'),
+  studyDuration: z.string().min(1, 'Sélectionnez la durée d\'étude voulue'),
   bacMention: z.string().min(1, 'Sélectionnez une mention'),
   password: z
     .string()
@@ -101,8 +65,48 @@ function Register() {
 
   const [isBacFieldsDisabled, setIsBacFieldsDisabled] = useState(true);
   const [isMentionBacDisabled, setIsMentionBacDisabled] = useState(true);
+  const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+  const [availableFilieres, setAvailableFilieres] = useState<string[]>([]);
+  const [availableStudyDurations, setAvailableStudyDurations] = useState<string[]>([]);
+  const [availableCareerAspirations, setAvailableCareerAspirations] = useState<string[]>([]);
+  const [availableBacMentions, setAvailableBacMentions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const selectedYear = watch('year');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [subjectsRes, filieresRes, dureesRes, careersRes, mentionsRes] = await Promise.all([
+          fetch('http://localhost:8080/api/diplomas/subjects-etud'),
+          fetch('http://localhost:8080/api/diplomas/filiers'),
+          fetch('http://localhost:8080/api/diplomas/durees'),
+          fetch('http://localhost:8080/api/diplomas/careers'),
+          fetch('http://localhost:8080/api/diplomas/mentions')
+        ]);
+
+        const [subjectsData, filieresData, dureesData, careersData, mentionsData] = await Promise.all([
+          subjectsRes.json(),
+          filieresRes.json(),
+          dureesRes.json() as Promise<number[]>,
+          careersRes.json(),
+          mentionsRes.json()
+        ]);
+
+        setAvailableSubjects(subjectsData);
+        setAvailableFilieres(filieresData);
+        setAvailableStudyDurations(dureesData.map(d => `${d} ans`));
+        setAvailableCareerAspirations(careersData);
+        setAvailableBacMentions(mentionsData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   React.useEffect(() => {
     if (selectedYear === '1ère Bac' || selectedYear === '2ème Bac') {
@@ -134,9 +138,17 @@ function Register() {
       });
       navigate('/profile');
     } catch (err) {
-      console.error('Erreur d’inscription:', err);
+      console.error('Erreur d\'inscription:', err);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -145,156 +157,134 @@ function Register() {
           <div className="flex flex-col items-center mb-8">
             <UserPlus className="h-12 w-12 text-blue-600 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900">Créer Votre Compte</h2>
-            <p className="text-gray-600 mt-2">Rejoignez notre plateforme d’orientation académique</p>
+            <p className="text-gray-600 mt-2">Rejoignez notre plateforme d\'orientation académique</p>
           </div>
 
           {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-  <div className="flex-1">
-    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-      Nom Complet
-    </label>
-    <Input
-      id="name"
-      type="text"
-      placeholder="Entrez votre nom complet"
-      error={!!errors.name}
-      helperText={errors.name?.message}
-      {...register('name')}
-    />
-  </div>
-
-  <div className="flex-1">
-    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-      Email
-    </label>
-    <Input
-      id="email"
-      type="email"
-      placeholder="Entrez votre email"
-      error={!!errors.email}
-      helperText={errors.email?.message}
-      {...register('email')}
-    />
-  </div>
-</div>
-
-<div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-    <div className="flex-1">
-      <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
-        Année Académique
-      </label>
-      <select
-        id="year"
-        {...register('year')}
-        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      >
-        <option value="">Sélectionnez une année</option>
-        <option value="1ère Bac">1ère Bac</option>
-        <option value="2ème Bac">2ème Bac</option>
-      </select>
-      {errors.year && (
-        <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
-      )}
-    </div>
-
-    <div className="flex-1">
-      <label htmlFor="filiere" className="block text-sm font-medium text-gray-700 mb-1">
-        Filière
-      </label>
-      <select
-        id="filiere"
-        {...register('filiere')}
-        disabled={isBacFieldsDisabled}
-        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-          isBacFieldsDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
-        }`}
-      >
-        <option value="">Sélectionnez une filière</option>
-        {filieres.map((filiere) => (
-          <option key={filiere} value={filiere}>
-            {filiere}
-          </option>
-        ))}
-      </select>
-      {errors.filiere && (
-        <p className="mt-1 text-sm text-red-600">{errors.filiere.message}</p>
-      )}
-    </div>
-  </div>
-
-  {/* Durée d’Étude Voulue Post-Bac and Mention Bac in one line */}
-  <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-    <div className="flex-1">
-      <label htmlFor="studyDuration" className="block text-sm font-medium text-gray-700 mb-1">
-        Durée d’Étude Voulue Post-Bac
-      </label>
-      <select
-        id="studyDuration"
-        {...register('studyDuration')}
-        disabled={isBacFieldsDisabled}
-        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-          isBacFieldsDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
-        }`}
-      >
-        <option value="">Sélectionnez une durée</option>
-        {studyDurations.map((duration) => (
-          <option key={duration} value={duration}>
-            {duration}
-          </option>
-        ))}
-      </select>
-      {errors.studyDuration && (
-        <p className="mt-1 text-sm text-red-600">{errors.studyDuration.message}</p>
-      )}
-    </div>
-
-    <div className="flex-1">
-      <label htmlFor="bacMention" className="block text-sm font-medium text-gray-700 mb-1">
-        Mention Bac
-      </label>
-      <select
-        id="bacMention"
-        {...register('bacMention')}
-        disabled={isMentionBacDisabled}
-        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-          isMentionBacDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
-        }`}
-      >
-        <option value="">Sélectionnez une mention</option>
-        {bacMentions.map((mention) => (
-          <option key={mention} value={mention}>
-            {mention}
-          </option>
-        ))}
-      </select>
-      {errors.bacMention && (
-        <p className="mt-1 text-sm text-red-600">{errors.bacMention.message}</p>
-      )}
-    </div>
-  </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Intérêts
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                {interests.map((interest) => (
-                  <label key={interest} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={interest}
-                      {...register('interests')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{interest}</span>
-                  </label>
-                ))}
+            <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+              <div className="flex-1">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom Complet
+                </label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Entrez votre nom complet"
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                  {...register('name')}
+                />
               </div>
-              {errors.interests && (
-                <p className="mt-1 text-sm text-red-600">{errors.interests.message}</p>
-              )}
+
+              <div className="flex-1">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Entrez votre email"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  {...register('email')}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+              <div className="flex-1">
+                <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
+                  Année Académique
+                </label>
+                <select
+                  id="year"
+                  {...register('year')}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                  <option value="">Sélectionnez une année</option>
+                  <option value="1ère Bac">1ère Bac</option>
+                  <option value="2ème Bac">2ème Bac</option>
+                </select>
+                {errors.year && (
+                  <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <label htmlFor="filiere" className="block text-sm font-medium text-gray-700 mb-1">
+                  Filière
+                </label>
+                <select
+                  id="filiere"
+                  {...register('filiere')}
+                  disabled={isBacFieldsDisabled}
+                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                    isBacFieldsDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <option value="">Sélectionnez une filière</option>
+                  {availableFilieres.map((filiere) => (
+                    <option key={filiere} value={filiere}>
+                      {filiere}
+                    </option>
+                  ))}
+                </select>
+                {errors.filiere && (
+                  <p className="mt-1 text-sm text-red-600">{errors.filiere.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+              <div className="flex-1">
+                <label htmlFor="studyDuration" className="block text-sm font-medium text-gray-700 mb-1">
+                  Durée d\'Étude Voulue Post-Bac
+                </label>
+                <select
+                  id="studyDuration"
+                  {...register('studyDuration')}
+                  disabled={isBacFieldsDisabled}
+                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                    isBacFieldsDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <option value="">Sélectionnez une durée</option>
+                  {availableStudyDurations.map((duration) => (
+                    <option key={duration} value={duration}>
+                      {duration}
+                    </option>
+                  ))}
+                </select>
+                {errors.studyDuration && (
+                  <p className="mt-1 text-sm text-red-600">{errors.studyDuration.message}</p>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <label htmlFor="bacMention" className="block text-sm font-medium text-gray-700 mb-1">
+                  Mention Bac
+                </label>
+                <select
+                  id="bacMention"
+                  {...register('bacMention')}
+                  disabled={isMentionBacDisabled}
+                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                    isMentionBacDisabled ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <option value="">Sélectionnez une mention</option>
+                  {availableBacMentions.map((mention) => (
+                    <option key={mention} value={mention}>
+                      {mention}
+                    </option>
+                  ))}
+                </select>
+                {errors.bacMention && (
+                  <p className="mt-1 text-sm text-red-600">{errors.bacMention.message}</p>
+                )}
+              </div>
             </div>
 
             <div>
@@ -302,7 +292,7 @@ function Register() {
                 Matières que vous aimez
               </label>
               <div className="grid grid-cols-2 gap-4">
-                {subjects.map((subject) => (
+                {availableSubjects.map((subject) => (
                   <label key={subject} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -324,7 +314,7 @@ function Register() {
                 Aspirations Professionnelles
               </label>
               <div className="grid grid-cols-2 gap-4">
-                {careerAspirations.map((aspiration) => (
+                {availableCareerAspirations.map((aspiration) => (
                   <label key={aspiration} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -398,7 +388,6 @@ function Register() {
                 'Créer un Compte'
               )}
             </Button>
-            {/* Interests, Subjects, Career Aspirations, Password, Confirm Password, and Submit Button... */}
           </form>
         </div>
       </div>
