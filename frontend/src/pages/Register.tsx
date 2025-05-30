@@ -29,7 +29,6 @@ const registerSchema = z.object({
   email: z.string().email('Veuillez entrer un email valide'),
   year: z.enum(['1ère Bac', '2ème Bac']),
   filiere: z.string().min(1, 'Sélectionnez une filière'),
-  interests: z.array(z.string()).min(1, 'Sélectionnez au moins un intérêt'),
   subjects: z.array(z.string()).min(1, 'Sélectionnez au moins une matière que vous aimez'),
   careerAspirations: z
     .array(z.string())
@@ -61,7 +60,10 @@ function Register() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange',
   });
+
+  console.log('Form errors:', errors);
 
   const [isBacFieldsDisabled, setIsBacFieldsDisabled] = useState(true);
   const [isMentionBacDisabled, setIsMentionBacDisabled] = useState(true);
@@ -123,23 +125,31 @@ function Register() {
   }, [selectedYear]);
 
   const onSubmit = async (data: RegisterForm) => {
+    console.log('Form submitted with data:', data);
     try {
+      console.log('Attempting to register user...');
       await registerUser({
         name: data.name,
         email: data.email,
         year: data.year,
         filiere: data.filiere,
-        interests: data.interests,
+        interests: data.subjects,
         subjects: data.subjects,
         careerAspirations: data.careerAspirations,
         duree: parseInt(data.studyDuration[0]),
         montionBac: data.bacMention,
         password: data.password,
       });
+      console.log('Registration successful, navigating to profile');
       navigate('/profile');
     } catch (err) {
-      console.error('Erreur d\'inscription:', err);
+      console.error('Registration error:', err);
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log('Form submit event triggered');
+    handleSubmit(onSubmit)(e);
   };
 
   if (isLoading) {
@@ -162,7 +172,7 @@ function Register() {
 
           {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
             <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
               <div className="flex-1">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -359,7 +369,12 @@ function Register() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting}
+              onClick={() => console.log('Submit button clicked')}
+            >
               {isSubmitting ? (
                 <span className="flex items-center justify-center">
                   <svg

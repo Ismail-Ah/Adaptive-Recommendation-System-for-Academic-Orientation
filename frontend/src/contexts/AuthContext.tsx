@@ -131,14 +131,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = useCallback(async (data: RegisterData) => {
     try {
+      console.log("Attempting to register with data:", data);
       dispatch({ type: 'AUTH_START' });
+      
       const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Registration failed');
-      const responseData = await response.json();
+
+      console.log("Registration response status:", response.status);
+      const responseText = await response.text();
+      console.log("Registration response text:", responseText);
+
+      if (!response.ok) {
+        throw new Error(responseText || 'Registration failed');
+      }
+
+      const responseData = JSON.parse(responseText);
+      console.log("Parsed registration data:", responseData);
+
       const user: User = {
         id: responseData.id,
         email: responseData.email,
@@ -147,16 +159,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         montionBac: responseData.montionBac,
         duree: responseData.duree,
         year: responseData.year,
-        interests: responseData.interests,
-        subjects: responseData.subjects,
-        careerAspirations: responseData.careerAspirations,
+        interests: responseData.interests || [],
+        subjects: responseData.subjects || [],
+        careerAspirations: responseData.careerAspirations || [],
         role: responseData.role,
       };
+
       localStorage.setItem('token', responseData.token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token: responseData.token } });
+      console.log("Registration successful, user created:", user);
     } catch (error) {
+      console.error('Registration error:', error);
       localStorage.removeItem('token');
-      dispatch({ type: 'AUTH_FAILURE', payload: 'Registration failed' });
+      dispatch({ type: 'AUTH_FAILURE', payload: error instanceof Error ? error.message : 'Registration failed' });
       throw error;
     }
   }, []);
