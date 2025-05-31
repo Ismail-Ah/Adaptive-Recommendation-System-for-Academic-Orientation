@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, BookOpen, LogOut } from 'lucide-react';
+import { User, BookOpen, LogOut, GraduationCap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -96,6 +96,24 @@ function Sidebar({ onExpandChange }: SidebarProps) {
             } overflow-hidden`}
           >
             Recommendations
+          </span>
+        </Link>
+        <Link
+          to="/my-diplomas"
+          className={`${isActive('/my-diplomas')} group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200`}
+          title={!isExpanded ? 'My Diplomas' : ''}
+        >
+          <GraduationCap
+            className={`mr-3 h-5 w-5 flex-shrink-0 transition-transform duration-200 ${
+              isExpanded ? 'scale-100' : 'scale-110'
+            }`}
+          />
+          <span
+            className={`transition-all duration-200 ${
+              isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'
+            } overflow-hidden`}
+          >
+            My Diplomas
           </span>
         </Link>
       </nav>

@@ -16,6 +16,9 @@ public class User {
 
     @Relationship(type = "QUALIFIE_FOR")
     private List<QualifieForRelationship> diplomeRelationships;
+    
+    @Relationship(type = "HAS_FEEDBACK")
+    private List<Feedback> feedbacks = new ArrayList<>();
 
     public User() {
         this.diplomeRelationships = new ArrayList<>();

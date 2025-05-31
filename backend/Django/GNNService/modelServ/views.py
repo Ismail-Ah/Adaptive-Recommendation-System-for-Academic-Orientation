@@ -31,7 +31,7 @@ class DiplomaRecommendationAPI(APIView):
             desired_duree = user_features.get('Durée', 3)
             try:
                 if self.recommender.validate_user_input(user_features):
-                    predictions = self.recommender.predict(user_features, desired_duree, top_k=5)
+                    predictions = self.recommender.predict(user_features, desired_duree, top_k=10)
                     output_serializer = DiplomaRecommendationOutputSerializer(predictions.to_dict('records'), many=True)
                     return Response(output_serializer.data, status=status.HTTP_200_OK)
                 else:

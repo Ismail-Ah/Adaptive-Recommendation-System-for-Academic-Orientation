@@ -44,4 +44,6 @@ public class DiplomeDTO {
 
     @JsonProperty("match_percentage")
     private Double match_percentage;
+
+    
 }

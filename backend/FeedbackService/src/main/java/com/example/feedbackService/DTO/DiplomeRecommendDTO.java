@@ -1,7 +1,14 @@
 package com.example.feedbackService.DTO;
 
+import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
@@ -18,4 +25,7 @@ public class DiplomeRecommendDTO {
     private Set<String> Matieres_Etudiant;
     private Set<String> Matieres_Diplome;
     private Integer match_percentage;
+    private List<String> notes;
+    private float rating;
+    private boolean like;
 }

@@ -276,10 +276,16 @@ public class UserDiplomeController {
             // Step 2: Delete existing diploma relationships
             List<QualifieForRelationship> existingRelationships = user.getDiplomeRelationships();
             if (existingRelationships != null && !existingRelationships.isEmpty()) {
-                logger.info("Deleting {} existing diploma relationships for user: {}", existingRelationships.size(), email);
+                logger.info("Processing {} existing diploma relationships for user: {}", existingRelationships.size(), email);
                 for (QualifieForRelationship relationship : existingRelationships) {
-                    diplomeService.delete(relationship.getDiplome());
-                    logger.info("Deleted diploma: {}", relationship.getDiplome().getName());
+                    Diplome diplome = relationship.getDiplome();
+                    // Only delete if there are no feedback relationships
+                    if (!diplomeService.hasFeedbackRelationships(diplome)) {
+                        diplomeService.delete(diplome);
+                        logger.info("Deleted diploma: {} (no feedback relationships)", diplome.getName());
+                    } else {
+                        logger.info("Preserved diploma: {} (has feedback relationships)", diplome.getName());
+                    }
                 }
             }
             user.setDiplomeRelationships(new ArrayList<>());

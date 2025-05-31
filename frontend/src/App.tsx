@@ -16,6 +16,7 @@ import { DiplomaForm } from './components/Admin/DiplomaForm'; // ✅ Import Dipl
 import { DiplomaStatistics } from './components/Admin/DiplomaStatistics';
 
 import AdminDiplomas from './pages/AdminDiplomas';
+import MyDiplomas from './pages/MyDiplomas';
 
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -88,6 +89,7 @@ function App() {
             >
               <Route path="/profile" element={<Profile />} />
               <Route path="/recommendations" element={<Recommendations />} />
+              <Route path="/my-diplomas" element={<MyDiplomas />} />
             </Route>
 
             {/* Admin Layout */}

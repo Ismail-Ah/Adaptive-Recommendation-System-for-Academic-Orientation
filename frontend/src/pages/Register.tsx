@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 // Moroccan curriculum-based interests
@@ -73,6 +73,12 @@ function Register() {
   const [availableCareerAspirations, setAvailableCareerAspirations] = useState<string[]>([]);
   const [availableBacMentions, setAvailableBacMentions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [subjectSearch, setSubjectSearch] = useState('');
+  const [careerSearch, setCareerSearch] = useState('');
+  const [showAllSubjects, setShowAllSubjects] = useState(false);
+  const [showAllCareers, setShowAllCareers] = useState(false);
+  const SUBJECTS_PER_PAGE = 6;
+  const CAREERS_PER_PAGE = 6;
 
   const selectedYear = watch('year');
 
@@ -151,6 +157,17 @@ function Register() {
     console.log('Form submit event triggered');
     handleSubmit(onSubmit)(e);
   };
+
+  const filteredSubjects = availableSubjects.filter(subject =>
+    subject.toLowerCase().includes(subjectSearch.toLowerCase())
+  );
+
+  const filteredCareers = availableCareerAspirations.filter(career =>
+    career.toLowerCase().includes(careerSearch.toLowerCase())
+  );
+
+  const displayedSubjects = showAllSubjects ? filteredSubjects : filteredSubjects.slice(0, SUBJECTS_PER_PAGE);
+  const displayedCareers = showAllCareers ? filteredCareers : filteredCareers.slice(0, CAREERS_PER_PAGE);
 
   if (isLoading) {
     return (
@@ -297,44 +314,132 @@ function Register() {
               </div>
             </div>
 
-            <div>
+            <div className="space-y-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Matières que vous aimez
               </label>
-              <div className="grid grid-cols-2 gap-4">
-                {availableSubjects.map((subject) => (
-                  <label key={subject} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={subject}
-                      {...register('subjects')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{subject}</span>
-                  </label>
-                ))}
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher une matière..."
+                    value={subjectSearch}
+                    onChange={(e) => setSubjectSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {subjectSearch && (
+                    <button
+                      onClick={() => setSubjectSearch('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {displayedSubjects.map((subject) => (
+                    <label
+                      key={subject}
+                      className={`flex items-center space-x-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                        (watch('subjects') || [])?.includes(subject)
+                          ? 'bg-blue-50 border-blue-200'
+                          : 'hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        value={subject}
+                        {...register('subjects')}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{subject}</span>
+                    </label>
+                  ))}
+                </div>
+                {filteredSubjects.length > SUBJECTS_PER_PAGE && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllSubjects(!showAllSubjects)}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                  >
+                    {showAllSubjects ? (
+                      <>
+                        Voir moins <ChevronUp className="ml-1 h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        Voir plus ({filteredSubjects.length - SUBJECTS_PER_PAGE} autres) <ChevronDown className="ml-1 h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
               {errors.subjects && (
                 <p className="mt-1 text-sm text-red-600">{errors.subjects.message}</p>
               )}
             </div>
 
-            <div>
+            <div className="space-y-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Aspirations Professionnelles
               </label>
-              <div className="grid grid-cols-2 gap-4">
-                {availableCareerAspirations.map((aspiration) => (
-                  <label key={aspiration} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={aspiration}
-                      {...register('careerAspirations')}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{aspiration}</span>
-                  </label>
-                ))}
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher une carrière..."
+                    value={careerSearch}
+                    onChange={(e) => setCareerSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  {careerSearch && (
+                    <button
+                      onClick={() => setCareerSearch('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {displayedCareers.map((career) => (
+                    <label
+                      key={career}
+                      className={`flex items-center space-x-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                        (watch('careerAspirations') || [])?.includes(career)
+                          ? 'bg-blue-50 border-blue-200'
+                          : 'hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        value={career}
+                        {...register('careerAspirations')}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{career}</span>
+                    </label>
+                  ))}
+                </div>
+                {filteredCareers.length > CAREERS_PER_PAGE && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllCareers(!showAllCareers)}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                  >
+                    {showAllCareers ? (
+                      <>
+                        Voir moins <ChevronUp className="ml-1 h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        Voir plus ({filteredCareers.length - CAREERS_PER_PAGE} autres) <ChevronDown className="ml-1 h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
               {errors.careerAspirations && (
                 <p className="mt-1 text-sm text-red-600">{errors.careerAspirations.message}</p>

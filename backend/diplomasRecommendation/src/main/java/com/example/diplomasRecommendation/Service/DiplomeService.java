@@ -19,8 +19,17 @@ public class DiplomeService{
     public Diplome findByName(String name) {
         return diplomeRepository.findByName(name);
     }
+
+    public boolean hasFeedbackRelationships(Diplome diplome) {
+        return diplomeRepository.countFeedbackRelationships(diplome.getId()) > 0;
+    }
+
     public void delete(Diplome diplome) {
-        diplomeRepository.delete(diplome); // Assuming repository is a Neo4j repository
+        // Only delete if there are no feedback relationships
+        if (!hasFeedbackRelationships(diplome)) {
+            diplomeRepository.delete(diplome);
+        }
+        // If there are feedback relationships, we keep the diploma for historical purposes
     }
 
     public Diplome findById(String diplome){
